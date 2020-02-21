@@ -61,6 +61,7 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:visibility="gone"
                     android:id="@+id/textView55"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -70,6 +71,7 @@
 
                     android:textSize="20sp" />
                 <Spinner
+                    android:visibility="gone"
                     android:id = "@+id/domains"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

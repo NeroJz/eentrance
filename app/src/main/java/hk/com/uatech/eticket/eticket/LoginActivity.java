@@ -253,7 +253,7 @@ public class LoginActivity extends AppCompatActivity implements NetworkRepositor
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == SETTINGS_CLOSED) {
-            NetworkRepository.getInstance().getDomains(this);
+//            NetworkRepository.getInstance().getDomains(this);
         }
     }
 }

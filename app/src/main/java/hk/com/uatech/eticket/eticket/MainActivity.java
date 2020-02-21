@@ -1,5 +1,6 @@
 package hk.com.uatech.eticket.eticket;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Intent;
@@ -10,6 +11,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.text.TextUtils;
@@ -30,42 +33,25 @@ public class MainActivity extends AppCompatActivity {
     private final int MY_PERMISSIONS_CAMERA = 10099;
     private final static int SPLASH_DISPLAY_LENGTH = 1000;
 
+    private final int MY_EXTERNAL_STORAGE = 20001;
+
+    private final static String DIR_NAME = "/ETicket";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        boolean showEditPage = false;
 
-        if (TextUtils.isEmpty(PreferencesController.getInstance().getServerIpAddress())) {
-            showEditPage = true;
-            PreferencesController.getInstance().setServerIpAddress(
-                    Utils.getConfigValue(MainActivity.this, "api_url"));
+        // Request External Storage Permission
+        if(ContextCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            requestExternalStoragePermission();
+
+            return;
+        } else {
+
         }
-
-        if (TextUtils.isEmpty(PreferencesController.getInstance().getEntrance())) {
-            showEditPage = true;
-            PreferencesController.getInstance().setEntrance(
-                    Utils.getConfigValue(MainActivity.this, "api_path"));
-        }
-
-        if (TextUtils.isEmpty(PreferencesController.getInstance().getFb())) {
-            showEditPage = true;
-            PreferencesController.getInstance().setFb(
-                    Utils.getConfigValue(MainActivity.this, "fb_api_path"));
-        }
-        final boolean finalShowEditPage = showEditPage;
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                /* Create an Intent that will start the Menu-Activity. */
-                Intent mainIntent = new Intent(MainActivity.this, LoginActivity.class);
-                mainIntent.putExtra("showEditPage", finalShowEditPage ? "Y" : "N");
-                MainActivity.this.startActivity(mainIntent);
-                MainActivity.this.finish();
-            }
-        }, SPLASH_DISPLAY_LENGTH);
-
-
+        handleIntent();
     }
 
 
@@ -94,6 +80,29 @@ public class MainActivity extends AppCompatActivity {
                     finish();
                 }
                 return;
+            }
+
+            // Handle ExternalStorage Permission Delegate
+            case MY_EXTERNAL_STORAGE: {
+                // Create folder only permission is granted
+                if(ContextCompat.checkSelfPermission(
+                        MainActivity.this,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+
+                    File f = new File(Environment.getExternalStorageDirectory(), DIR_NAME);
+
+                    if(!f.exists()) {
+                        if(f.mkdirs()) {
+                            Log.d("MainActivity", "Created!!!");
+                        }
+                    }
+                } else {
+                    Toast.makeText(MainActivity.this,
+                            "External storage is required",
+                            Toast.LENGTH_LONG).show();
+                }
+
+                handleIntent();
             }
 
             // other 'case' lines to check for other
@@ -151,6 +160,58 @@ public class MainActivity extends AppCompatActivity {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+
+
+    /**
+     * Request ExternalStorage Permission
+     */
+    private void requestExternalStoragePermission() {
+        if(ContextCompat.checkSelfPermission(
+                MainActivity.this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    MainActivity.this,
+                    new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    MY_EXTERNAL_STORAGE);
+        }
+    }
+
+
+    /**
+     * Handle the intent goes to Login Screen
+     */
+    private void handleIntent() {
+        boolean showEditPage = false;
+
+        if (TextUtils.isEmpty(PreferencesController.getInstance().getServerIpAddress())) {
+            showEditPage = true;
+            PreferencesController.getInstance().setServerIpAddress(
+                    Utils.getConfigValue(MainActivity.this, "api_url"));
+        }
+
+        if (TextUtils.isEmpty(PreferencesController.getInstance().getEntrance())) {
+            showEditPage = true;
+            PreferencesController.getInstance().setEntrance(
+                    Utils.getConfigValue(MainActivity.this, "api_path"));
+        }
+
+        if (TextUtils.isEmpty(PreferencesController.getInstance().getFb())) {
+            showEditPage = true;
+            PreferencesController.getInstance().setFb(
+                    Utils.getConfigValue(MainActivity.this, "fb_api_path"));
+        }
+        final boolean finalShowEditPage = showEditPage;
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                /* Create an Intent that will start the Menu-Activity. */
+                Intent mainIntent = new Intent(MainActivity.this, LoginActivity.class);
+                mainIntent.putExtra("showEditPage", finalShowEditPage ? "Y" : "N");
+                MainActivity.this.startActivity(mainIntent);
+                MainActivity.this.finish();
+            }
+        }, SPLASH_DISPLAY_LENGTH);
     }
 
 

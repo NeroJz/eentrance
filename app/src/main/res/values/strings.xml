@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">ETicket</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_menu">MenuActivity</string>
+    <string name="title_activity_setting">SettingActivity</string>
+
+    <string name="title_activity_splash">SplashActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="title_activity_entract_step1">EntractStep1Activity</string>
+    <string name="title_activity_entrance_step2">EntranceStep2Activity</string>
+    <string name="title_activity_entrace_step3">EntraceStep3Activity</string>
+    <string name="title_activity_print_job">PrintJob</string>
+    <string name="title_activity_print">PrintActivity</string>
+</resources>

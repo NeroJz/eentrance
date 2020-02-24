@@ -1,11 +1,13 @@
 package hk.com.uatech.eticket.eticket;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -13,10 +15,14 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import hk.com.uatech.eticket.eticket.delegate.showtime.ShowtimeEvent;
+import hk.com.uatech.eticket.eticket.delegate.showtime.ShowtimeNotifier;
 import hk.com.uatech.eticket.eticket.preferences.PreferencesController;
 import hk.com.uatech.eticket.eticket.preferences.SettingActivity;
 
-public class MenuActivity extends AppCompatActivity {
+public class MenuActivity extends AppCompatActivity implements ShowtimeEvent {
+
+    private static ProgressDialog loading = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,6 +126,19 @@ public class MenuActivity extends AppCompatActivity {
             }
 
         });
+
+        String accessMode = PreferencesController.getInstance().getAccessMode();
+
+        if(accessMode.equals("online")) {
+            Log.d(MenuActivity.class.toString(), "AccessMode: " + accessMode);
+        } else if(accessMode.equals("offline")) {
+            showLoading();
+
+            ShowtimeNotifier notifier = new ShowtimeNotifier(this);
+
+            notifier.doWork(this);
+
+        }
     }
 
 
@@ -194,4 +213,33 @@ public class MenuActivity extends AppCompatActivity {
 
     }
 
+
+    /**
+     * Display loading spinner
+     */
+    private void showLoading() {
+        if(loading == null) {
+            loading = new ProgressDialog(this);
+            loading.setMessage("Loading");
+            loading.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        }
+
+        loading.show();
+    }
+
+
+    /**
+     * Hide loading spinner
+     */
+    private void dismissLoad() {
+        if(loading != null && loading.isShowing()) {
+            loading.dismiss();
+        }
+    }
+
+
+    @Override
+    public void completeHandler() {
+        dismissLoad();
+    }
 }

@@ -12,7 +12,7 @@ import java.util.List;
  * Created by alex_ on 08/09/2017.
  */
 
-public class OfflineDatabase {
+public class OfflineDatabase extends Model {
 
     // 表格名稱
     public static final String TABLE_NAME = "test_data";
@@ -37,15 +37,16 @@ public class OfflineDatabase {
 
 
     // 資料庫物件
-    private SQLiteDatabase db;
+//    private SQLiteDatabase db;
     // 建構子，一般的應用都不需要修改
     public OfflineDatabase(Context context){
-        db = DBHelper.getDatabase(context);
+        super(context);
+//        db = DBHelper.getDatabase(context);
     }
     // 關閉資料庫，一般的應用都不需要修改
-    public void close() {
-        db.close();
-    }
+//    public void close() {
+//        db.close();
+//    }
 
 
 

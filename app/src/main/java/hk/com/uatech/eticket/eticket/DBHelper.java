@@ -5,6 +5,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import hk.com.uatech.eticket.eticket.database.Show;
+
 /**
  * Created by alex_ on 08/09/2017.
  */
@@ -34,6 +36,10 @@ public class DBHelper extends SQLiteOpenHelper {
         // 建立應用程式需要的表格
         db.execSQL(OfflineDatabase.CREATE_TABLE);
         db.execSQL(OfflineDatabase.INDEX_1);
+
+
+        // Create Show Table
+        db.execSQL(Show.CREATE_TABLE);
 
     }
 

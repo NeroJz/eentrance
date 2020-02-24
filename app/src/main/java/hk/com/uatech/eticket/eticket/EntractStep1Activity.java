@@ -22,8 +22,9 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import hk.com.uatech.eticket.eticket.preferences.PreferencesController;
+import hk.com.uatech.eticket.eticket.qrCode.QRActivity;
 
-public class EntractStep1Activity extends CheckQrActivity {    private ProgressDialog loading = null;
+public class EntractStep1Activity extends QRActivity {    private ProgressDialog loading = null;
     private Button btnQRCode;
     private Button btnBack;
     private final int TASK_COMPLETED = 100;
@@ -94,7 +95,10 @@ public class EntractStep1Activity extends CheckQrActivity {    private ProgressD
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        new IntentIntegrator(EntractStep1Activity.this).initiateScan();
+//                        new IntentIntegrator(EntractStep1Activity.this).initiateScan();
+
+                        String test = "fKFHzkcuU5kqS4fA5uxNrGMDeIGo6pkgqqSDYJHPDHwHlDRM1Mvle0wmWcotSOSoVUemq7A/nXANA4MgT0l04iNFodXdSGH2niCve6dptanZ+bjnjKc7fNQapFvDU9gZmVNoYuDUKsn2R6lJaOfBcA2/bwWeSpwAdyR/eUvn0WQ=";
+                        handleQrCode(test, true);
                     }
                 });
 
@@ -125,14 +129,12 @@ public class EntractStep1Activity extends CheckQrActivity {    private ProgressD
                     System.out.println(s.toString());
                     handleQrCode(edtQrCode.getEditableText().toString());
 
-
                 }
 
             }
         });
         edtQrCode.setText("");
         edtQrCode.requestFocus();
-
 
     }
 

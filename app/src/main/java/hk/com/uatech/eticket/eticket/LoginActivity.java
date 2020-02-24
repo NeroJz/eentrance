@@ -38,6 +38,11 @@ public class LoginActivity extends AppCompatActivity implements NetworkRepositor
     private Spinner domainSpinner;
     private Map<String, String> domains = new HashMap<>();
 
+
+    // TEST ADMIN
+    private static String ADMIN_USERNAME = "admin";
+    private static String ADMIN_PASSWORD = "admin";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,7 +54,9 @@ public class LoginActivity extends AppCompatActivity implements NetworkRepositor
         edtLoginId = (EditText) findViewById(R.id.loginId);
         edtPassword = (EditText) findViewById(R.id.password);
         domainSpinner = (Spinner) findViewById(R.id.domains);
-        NetworkRepository.getInstance().getDomains(this);
+
+        // Get the domain ids
+//        NetworkRepository.getInstance().getDomains(this);
 
         findViewById(R.id.btnLogin).setOnClickListener(new Button.OnClickListener() {
 
@@ -94,7 +101,31 @@ public class LoginActivity extends AppCompatActivity implements NetworkRepositor
                         edtLoginId.setText("");
                         edtPassword.setText("");
 
-                    } else {
+                    }
+
+                    /**
+                     * Dummy Test
+                     * Author: JZ
+                     * Date: 24-02-2020
+                     * Version: 0.0.1
+                     */
+                    else if(ADMIN_USERNAME.equals(edtLoginId.getEditableText().toString())
+                            && ADMIN_PASSWORD.equals(edtPassword.getEditableText().toString())) {
+                        edtLoginId.setText("");
+                        edtPassword.setText("");
+
+                        PreferencesController.getInstance().setAccessMode("online");
+                        PreferencesController.getInstance().setUserRank("MANAGER");
+
+
+                        startActivity(new Intent(LoginActivity.this, MenuActivity.class));
+                    }
+
+                    /**
+                     * End of Dummy Test
+                     */
+
+                    else {
 
                         //String urlString = "http://13.228.58.92/thirdparty/api/e-entrance/staffAuth";
                         if (loading == null) {

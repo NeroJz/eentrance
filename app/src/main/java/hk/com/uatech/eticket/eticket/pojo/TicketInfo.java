@@ -31,6 +31,11 @@ public class TicketInfo {
 
     private String created_date;
 
+    private String trans_id = "";
+    private String movie_ctg = "";
+    private String seat = "";
+    private String ticket_type = "";
+
     public TicketInfo(String show_id, String show_date, String show_no,
                       String house_id, String house_ename, String house_cname,
                       String cinema_id, String cinema_ename, String cinema_cname,
@@ -201,5 +206,37 @@ public class TicketInfo {
 
     public void setCreated_date(String created_date) {
         this.created_date = created_date;
+    }
+
+    public String getTrans_id() {
+        return trans_id;
+    }
+
+    public void setTrans_id(String trans_id) {
+        this.trans_id = trans_id;
+    }
+
+    public String getMovie_ctg() {
+        return movie_ctg;
+    }
+
+    public void setMovie_ctg(String movie_ctg) {
+        this.movie_ctg = movie_ctg;
+    }
+
+    public String getSeat() {
+        return seat;
+    }
+
+    public void setSeat(String seat) {
+        this.seat = seat;
+    }
+
+    public String getTicket_type() {
+        return ticket_type;
+    }
+
+    public void setTicket_type(String ticket_type) {
+        this.ticket_type = ticket_type;
     }
 }

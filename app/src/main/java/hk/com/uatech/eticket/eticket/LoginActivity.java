@@ -116,6 +116,7 @@ public class LoginActivity extends AppCompatActivity implements NetworkRepositor
 
                         PreferencesController.getInstance().setAccessMode("online");
                         PreferencesController.getInstance().setUserRank("MANAGER");
+                        PreferencesController.getInstance().setSettingsEnabled(true);
 
 
                         startActivity(new Intent(LoginActivity.this, MenuActivity.class));

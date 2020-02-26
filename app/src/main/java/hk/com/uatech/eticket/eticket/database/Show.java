@@ -6,8 +6,13 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
 import hk.com.uatech.eticket.eticket.DBHelper;
 import hk.com.uatech.eticket.eticket.Model;
+import hk.com.uatech.eticket.eticket.pojo.TicketInfo;
 
 public class Show extends Model {
     // TABLE NAME
@@ -41,6 +46,37 @@ public class Show extends Model {
     public static final String TG_CNAME = "tg_cname";
 
     public static final String CREATED_DATE = "created_date";
+
+
+
+//    // SHOW DETAILS
+//    public static final int SHOW_ID_COL = "show_id";
+//    public static final int SHOW_DATE_COL = "show_date";
+//    public static final int SHOW_NO_COL = "show_no";
+//
+//    // HOUSE DETAILS
+//    public static final int HOUSE_ID_COL = "house_id";
+//    public static final int HOUSE_ENAME_COL = "house_ename";
+//    public static final int HOUSE_CNAME_COL = "house_cname";
+//
+//    // CINEMA DETAILS
+//    public static final int CINEMA_ID_COL = "cinema_id";
+//    public static final int CINEMA_ENAME_COL = "cinema_ename";
+//    public static final int CINEMA_CNAME_COL = "cinema_cname";
+//
+//    // MOVIE DETAILS
+//    public static final int MOVIE_ID_COL = "movie_id";
+//    public static final int MOVIE_ENAME_COL = "movie_ename";
+//    public static final int MOVIE_CNAME_COL = "movie_cname";
+//    public static final int DURATION_COL = "duration";
+//    public static final int MV_ATTRIBUTES_COL = "mv_attributes";
+//
+//    // TICKET GROUP DETAILS
+//    public static final int TG_CODE_COL = "tg_code";
+//    public static final int TG_ENAME_COL = "tg_ename";
+//    public static final int TG_CNAME_COL = "tg_cname";
+//
+//    public static final int CREATED_DATE_COL = "created_date";
 
     public static final String CREATE_TABLE =
             "CREATE TABLE " +
@@ -97,6 +133,50 @@ public class Show extends Model {
     }
 
 
+    public TicketInfo validate(int showID, int cinemaID) {
+        String[] selectionArgs = {String.valueOf(showID), String.valueOf(cinemaID)};
+
+        Cursor cursor = db.query(
+                TABLE_NAME,
+                null,
+                SHOW_ID + " = ? AND " + CINEMA_ID + " = ?",
+                selectionArgs,
+                null,
+                null,
+                null
+        );
+
+
+        if(cursor != null && cursor.getCount() > 0 && cursor.moveToNext()) {
+            TicketInfo ticket = new TicketInfo(
+                    cursor.getString(cursor.getColumnIndex(SHOW_ID)),
+                    cursor.getString(cursor.getColumnIndex(SHOW_DATE)),
+                    cursor.getString(cursor.getColumnIndex(SHOW_NO)),
+                    cursor.getString(cursor.getColumnIndex(HOUSE_ID)),
+                    cursor.getString(cursor.getColumnIndex(HOUSE_ENAME)),
+                    cursor.getString(cursor.getColumnIndex(HOUSE_CNAME)),
+                    cursor.getString(cursor.getColumnIndex(CINEMA_ID)),
+                    cursor.getString(cursor.getColumnIndex(CINEMA_ENAME)),
+                    cursor.getString(cursor.getColumnIndex(CINEMA_CNAME)),
+                    cursor.getString(cursor.getColumnIndex(MOVIE_ID)),
+                    cursor.getString(cursor.getColumnIndex(MOVIE_ENAME)),
+                    cursor.getString(cursor.getColumnIndex(MOVIE_CNAME)),
+                    cursor.getString(cursor.getColumnIndex(DURATION)),
+                    cursor.getString(cursor.getColumnIndex(MV_ATTRIBUTES)),
+                    cursor.getString(cursor.getColumnIndex(TG_CODE)),
+                    cursor.getString(cursor.getColumnIndex(TG_ENAME)),
+                    cursor.getString(cursor.getColumnIndex(TG_CNAME)),
+                    cursor.getString(cursor.getColumnIndex(CREATED_DATE))
+            );
+
+            return  ticket;
+        }
+
+        return null;
+
+    }
+
+
     public void add_shows(hk.com.uatech.eticket.eticket.pojo.Show[] shows) {
         Log.d(Show.class.toString(), "Start Add Shows");
         db.beginTransaction();
@@ -125,6 +205,11 @@ public class Show extends Model {
                 cv.put(TG_CODE, show.getTicket_group().getCode());
                 cv.put(TG_ENAME, show.getTicket_group().getName().getEn());
                 cv.put(TG_CNAME, show.getTicket_group().getName().getZh());
+
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String currentDateTime = sdf.format(new Date());
+
+                cv.put(CREATED_DATE, currentDateTime);
 
                 db.insert(TABLE_NAME, null, cv);
             }

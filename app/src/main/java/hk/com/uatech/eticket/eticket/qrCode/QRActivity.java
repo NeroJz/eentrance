@@ -43,6 +43,7 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
     final private static int MOVIE_CTG_INDEX = 7;
     final private static int SEAT_NO_INDEX = 8;
     final private static int TICKET_TYPE_INDEX = 9;
+    final private static int CONCESSION_TYPE_INDEX = 10;
 
     private ProgressDialog loading = null;
 

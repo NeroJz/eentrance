@@ -59,6 +59,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -756,6 +757,17 @@ public class EntranceStep2Activity extends CheckQrActivity implements NetworkRep
                 //dt = format.parse("10 August 2017 (Thu)" + " " + "12:20pm");
                 dt = format.parse(showDate + " " + showTime);
                 displayFileDateTime = dt.toString();
+
+                /**
+                 * Test Case
+                 */
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(new Date());
+                cal.add(Calendar.MINUTE, 5);
+                dt = cal.getTime();
+                /**
+                 * End of test case
+                 */
 
                 SimpleDateFormat displayFormat = new SimpleDateFormat("dd MMM yyyy (E) hh:mma", java.util.Locale.US);
                 displayFileDateTime = displayFormat.format(dt);

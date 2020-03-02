@@ -67,12 +67,13 @@ import java.util.List;
 import hk.com.uatech.eticket.eticket.network.NetworkRepository;
 import hk.com.uatech.eticket.eticket.network.ResponseType;
 import hk.com.uatech.eticket.eticket.preferences.PreferencesController;
+import hk.com.uatech.eticket.eticket.qrCode.QRActivity;
 import hk.com.uatech.eticket.eticket.utils.Utils;
 import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbFile;
 
 
-public class EntranceStep2Activity extends CheckQrActivity implements NetworkRepository.QueryCallback /*, ReceiveListener */ {
+public class EntranceStep2Activity extends QRActivity implements NetworkRepository.QueryCallback /*, ReceiveListener */ {
 
     private Printer mPrinter = null;
     private final int MY_PERMISSIONS_CAMERA = 10099;

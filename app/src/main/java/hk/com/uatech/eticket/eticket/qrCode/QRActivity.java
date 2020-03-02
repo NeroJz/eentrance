@@ -45,6 +45,10 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
     final private static int TICKET_TYPE_INDEX = 9;
     final private static int CONCESSION_TYPE_INDEX = 10;
 
+
+    final private static int REMAIN_TICKET = 1;
+    final private static int TOTAL_TICKET = 4;
+
     private ProgressDialog loading = null;
 
     protected String refType = "";
@@ -179,6 +183,27 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
                 loading.show();
 
                 // CALL API
+                /**
+                 * Test Case
+                 */
+                int remaining = TOTAL_TICKET - REMAIN_TICKET;
+
+                for(int i=0; i < remaining; i++) {
+                    SeatInfo seatInfo = ticket.getSeatInfoList()[i];
+                    seatInfo.setSeatStatus("Invalid");
+                }
+
+                loading.hide();
+
+                Gson gson = new Gson();
+                String json = gson.toJson(ticket);
+
+                Log.d(QRActivity.class.toString(), json);
+
+                goNext(json, Integer.toString(trans_id), refType, "");
+                /**
+                 * End of Test Case
+                 */
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -242,15 +267,16 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
 
         SeatInfo[] seatInfoList = new SeatInfo[seatArray.length];
         for(int i=0; i < seatArray.length; i++) {
-
-            OfflineDatabase db = new OfflineDatabase(this);
-            Item item = db.getRecordBySeatId(result.getTrans_id(), seatArray[i]);
+//
+//            OfflineDatabase db = new OfflineDatabase(this);
+//            Item item = db.getRecordBySeatId(result.getTrans_id(), seatArray[i]);
+//
+//            SeatInfo seatInfo = new SeatInfo(seatArray[i], ticketTypeArray[i]);
+//            if(item != null) {
+//                seatInfo.setSeatStatus(item.getSeatStatus());
+//            }
 
             SeatInfo seatInfo = new SeatInfo(seatArray[i], ticketTypeArray[i]);
-            if(item != null) {
-                seatInfo.setSeatStatus(item.getSeatStatus());
-            }
-
             seatInfoList[i] = seatInfo;
         }
 

@@ -5,6 +5,8 @@ public class SeatInfo {
     private String seatId;
     private String ticketType;
 
+    private boolean isChecked = false;
+
 
     public SeatInfo(String seatId, String ticketType) {
         this.seatId = seatId;
@@ -34,5 +36,13 @@ public class SeatInfo {
 
     public void setTicketType(String ticketType) {
         this.ticketType = ticketType;
+    }
+
+    public boolean isChecked() {
+        return isChecked;
+    }
+
+    public void setChecked(boolean checked) {
+        isChecked = checked;
     }
 }

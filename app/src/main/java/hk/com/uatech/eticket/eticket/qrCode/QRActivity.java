@@ -187,7 +187,12 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
 
     }
 
-
+    /**
+     * Get ticket trans
+     * Author: Jz
+     * Date: 02-03-2020
+     * Version: 0.0.1
+     */
     private TicketTrans getTicketTrans(String[] parts) {
         int show_id = Integer.parseInt(parts[SHOW_ID_INDEX]);
         int trans_id = Integer.parseInt(parts[TRANS_ID_INDEX]);

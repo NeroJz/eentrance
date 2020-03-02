@@ -1,7 +1,9 @@
-package hk.com.uatech.eticket.eticket;
+package hk.com.uatech.eticket.eticket.database;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+
+import hk.com.uatech.eticket.eticket.DBHelper;
 
 public class Model {
 

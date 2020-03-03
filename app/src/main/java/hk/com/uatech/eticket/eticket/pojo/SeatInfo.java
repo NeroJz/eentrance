@@ -6,6 +6,7 @@ public class SeatInfo {
     private String ticketType;
 
     private boolean isChecked = false;
+    private boolean isConcession = false;
 
 
     public SeatInfo(String seatId, String ticketType) {
@@ -44,5 +45,13 @@ public class SeatInfo {
 
     public void setChecked(boolean checked) {
         isChecked = checked;
+    }
+
+    public boolean isConcession() {
+        return isConcession;
+    }
+
+    public void setConcession(boolean concession) {
+        isConcession = concession;
     }
 }

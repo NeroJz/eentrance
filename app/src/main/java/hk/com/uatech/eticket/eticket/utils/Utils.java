@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.util.Log;
 
+import com.android.internal.util.Predicate;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -155,6 +158,23 @@ public class Utils {
         }
 
         return null;
+    }
+
+    /**
+     * Filter collection
+     * @param col
+     * @param predicate
+     * @param <T>
+     * @return
+     */
+    public static <T> Collection<T> filter(Collection<T> col, Predicate<T> predicate) {
+        Collection<T> result = new ArrayList<T>();
+        for(T element: col) {
+            if(predicate.apply(element)) {
+                result.add(element);
+            }
+        }
+        return result;
     }
 
 }

@@ -38,6 +38,7 @@ import android.widget.Toast;
 import com.epson.epos2.Epos2Exception;
 import com.epson.epos2.printer.Printer;
 import com.epson.epos2.printer.PrinterStatusInfo;
+import com.google.gson.Gson;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.ResultPoint;
 import com.journeyapps.barcodescanner.BarcodeCallback;
@@ -66,6 +67,8 @@ import java.util.List;
 
 import hk.com.uatech.eticket.eticket.network.NetworkRepository;
 import hk.com.uatech.eticket.eticket.network.ResponseType;
+import hk.com.uatech.eticket.eticket.pojo.SeatInfo;
+import hk.com.uatech.eticket.eticket.pojo.TicketTrans;
 import hk.com.uatech.eticket.eticket.preferences.PreferencesController;
 import hk.com.uatech.eticket.eticket.qrCode.QRActivity;
 import hk.com.uatech.eticket.eticket.utils.Utils;
@@ -177,6 +180,12 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
     private ImageView imgInvalid;
     private View cardBack;
     private TextView scanStatus;
+
+    // TicketTran Info
+    private TicketTrans ticketTrans;
+
+    private List<SeatInfo> checkedItems = new ArrayList<SeatInfo>();
+
 
     private BarcodeCallback callback = new BarcodeCallback() {
         @Override
@@ -445,6 +454,12 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
         jsonSource = jsonstr;
         //
 
+        // Populate the ticket trans variable
+        if(jsonSource != null && !jsonSource.equals(" ")) {
+            Gson gson = new Gson();
+            ticketTrans = gson.fromJson(jsonSource, TicketTrans.class);
+        }
+
 
         String movieTitle = "";
         String movieCategory = "";
@@ -622,11 +637,15 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
                         // Original is 1, but after chaing the requirement @20170822, all valid seat should be selected
                         seatIcon = 2;
                         validSeats++;
+
+                        setSeatChecked(true, y);
                     } else if ("Invalid".compareTo(seatStatus) == 0) {
                         seatIcon = 0;
+                        setSeatChecked(false, y);
 
                     } else {
                         seatIcon = 2;
+                        setSeatChecked(true, y);
                     }
 
 
@@ -3299,9 +3318,14 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
 
                     image.setImageResource(R.mipmap.available);
                     tmpState.set(position, 1);
+
+                    setSeatChecked(true, position);
+
                 } else {
                     image.setImageResource(R.mipmap.free);
                     tmpState.set(position, 0);
+
+                    setSeatChecked(false, position);
                 }
 
                 EntranceStep2Activity.this.ticketState.set(index, tmpState);
@@ -3760,8 +3784,6 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
 
                         }
                     }
-
-
                 }
 
             }
@@ -3769,7 +3791,10 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
             // Selected, need to insert / update to DB as Invalid
             OfflineDatabase offline = new OfflineDatabase(EntranceStep2Activity.this);
             try {
-                offline.accept(items);
+//                offline.accept(items);
+
+                addEntranceLog();
+
                 Toast.makeText(getApplicationContext(), "Save Successful", Toast.LENGTH_SHORT).show();
                 finish();
 
@@ -3862,6 +3887,35 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
 
         }
 
+    }
+
+    /**
+     * Set the seat is checked
+     * @param isChecked
+     * @param position
+     */
+    private void setSeatChecked(boolean isChecked, int position) {
+        if(ticketTrans == null) return;
+        SeatInfo item = ticketTrans.getSeatInfoList()[position];
+        item.setChecked(isChecked);
+
+        checkedItems.clear();
+
+        for(SeatInfo seat : ticketTrans.getSeatInfoList()) {
+            if(seat.isChecked()) {
+                checkedItems.add(seat);
+            }
+        }
+    }
+
+
+    /**
+     * Add EntranceLog to local db
+     */
+    private void addEntranceLog() {
+        if(ticketTrans == null) return;
+
+        Log.d(EntranceStep2Activity.class.toString(), String.valueOf(checkedItems.size()));
     }
 
 }

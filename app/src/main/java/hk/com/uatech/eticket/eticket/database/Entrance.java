@@ -87,7 +87,6 @@ public class Entrance  extends Model{
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
-            totalRows();
         }
     }
 

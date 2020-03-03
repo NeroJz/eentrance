@@ -1,6 +1,6 @@
 /**
  * Entrance POJO for Entrance Model
- * 
+ *
  * Author: JZ
  * Date: 02-03-2020
  * Version: 0.0.1

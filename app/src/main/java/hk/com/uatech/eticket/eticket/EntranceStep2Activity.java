@@ -35,6 +35,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.internal.util.Predicate;
 import com.epson.epos2.Epos2Exception;
 import com.epson.epos2.printer.Printer;
 import com.epson.epos2.printer.PrinterStatusInfo;
@@ -67,6 +68,7 @@ import java.util.List;
 
 import hk.com.uatech.eticket.eticket.network.NetworkRepository;
 import hk.com.uatech.eticket.eticket.network.ResponseType;
+import hk.com.uatech.eticket.eticket.pojo.Entrance;
 import hk.com.uatech.eticket.eticket.pojo.SeatInfo;
 import hk.com.uatech.eticket.eticket.pojo.TicketTrans;
 import hk.com.uatech.eticket.eticket.preferences.PreferencesController;
@@ -3301,31 +3303,39 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
             public void onItemClick(AdapterView<?> parent, View imgView, int position, long id) {
 
                 ArrayList tmpList = (ArrayList) EntranceStep2Activity.this.ticketList.get(index);
-                //ArrayList tmpIdList = (ArrayList) EntranceStep2Activity.this.ticketIdList.get(index);
+                ArrayList tmpIdList = (ArrayList) EntranceStep2Activity.this.ticketIdList.get(index);
                 ArrayList tmpState = (ArrayList) EntranceStep2Activity.this.ticketState.get(index);
+
+                Log.d(EntranceStep2Activity.class.toString(), tmpIdList.toString());
+                Log.d(EntranceStep2Activity.class.toString(), tmpIdList.get(position).toString());
 
 
                 int status = (int) tmpList.get(position);
                 if (status == 0) {
                     return;
-
                 }
 
                 int state = (int) tmpState.get(position);
 
                 ImageView image = (ImageView) imgView;
+
+
+                String seatID = (String) tmpIdList.get(position);
+
                 if (state == 0) {
 
                     image.setImageResource(R.mipmap.available);
                     tmpState.set(position, 1);
 
-                    setSeatChecked(true, position);
+                    // set isChecked based on seatID
+                    setSeatChecked(true, seatID);
 
                 } else {
                     image.setImageResource(R.mipmap.free);
                     tmpState.set(position, 0);
 
-                    setSeatChecked(false, position);
+                    // set isChecked based on seatID
+                    setSeatChecked(false, seatID);
                 }
 
                 EntranceStep2Activity.this.ticketState.set(index, tmpState);
@@ -3781,7 +3791,6 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
                             item.setRefNo(encryptRefNo);
 
                             items.add(item);
-
                         }
                     }
                 }
@@ -3847,11 +3856,8 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
                             }
                         }
 
-
                     }
-
                 }
-
 
                 jsonvalue.put("confirmSeat", jsonArr);
 
@@ -3900,7 +3906,39 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
         item.setChecked(isChecked);
 
         checkedItems.clear();
+        for(SeatInfo seat : ticketTrans.getSeatInfoList()) {
+            if(seat.isChecked()) {
+                checkedItems.add(seat);
+            }
+        }
+    }
 
+    /**
+     * Set the seat is checked based on seat id
+     * @param isChecked
+     * @param seatID
+     */
+    private void setSeatChecked(boolean isChecked, final String seatID){
+        if(ticketTrans == null) return;
+
+        List<SeatInfo> seats = Arrays.asList(ticketTrans.getSeatInfoList());
+
+        Predicate<SeatInfo> matchSeatID = new Predicate<SeatInfo>() {
+            @Override
+            public boolean apply(SeatInfo seatInfo) {
+                return seatInfo.getSeatId().equals(seatID);
+            }
+        };
+
+        Collection<SeatInfo> result = Utils.filter(seats, matchSeatID);
+
+        if(result.size() == 0) return;
+
+        for(SeatInfo seat : result) {
+            seat.setChecked(isChecked);
+        }
+
+        checkedItems.clear();
         for(SeatInfo seat : ticketTrans.getSeatInfoList()) {
             if(seat.isChecked()) {
                 checkedItems.add(seat);
@@ -3915,7 +3953,9 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
     private void addEntranceLog() {
         if(ticketTrans == null) return;
 
-        Log.d(EntranceStep2Activity.class.toString(), String.valueOf(checkedItems.size()));
+        for(SeatInfo seat : checkedItems) {
+            Log.d(EntranceStep2Activity.class.toString(), seat.getSeatId() + "---" + seat.isChecked() + "----" + seat.isConcession());
+        }
     }
 
 }

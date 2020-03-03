@@ -97,7 +97,7 @@
                     android:inputType="textPersonName"
 
                     android:textColor="#aaaaaa"
-                    android:text="" />
+                    android:text="offline" />
 
 
                 <TextView
@@ -117,7 +117,8 @@
                     android:ems="10"
                     android:inputType="textPassword"
 
-                    android:textColor="#aaaaaa" />
+                    android:textColor="#aaaaaa"
+                    android:text="offline" />
 
                 <Button
                     android:id="@+id/btnLogin"

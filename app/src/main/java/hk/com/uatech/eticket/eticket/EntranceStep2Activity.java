@@ -390,10 +390,12 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
         View actionPanel = findViewById(R.id.detailActionPanel);
         View navPanel = findViewById(R.id.navPanel);
         View mainPanel = findViewById(R.id.mainPanel);
+
         if (getIntent().getBooleanExtra("showScanner", false)) {
             barcodeView.setVisibility(View.VISIBLE);
             actionPanel.setVisibility(View.GONE);
             navPanel.setVisibility(View.GONE);
+
             if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
                     Manifest.permission.CAMERA)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -408,6 +410,7 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
                             MY_PERMISSIONS_CAMERA);
                 }
             }
+
         } else {
             barcodeView.setVisibility(View.GONE);
             actionPanel.setVisibility(View.VISIBLE);

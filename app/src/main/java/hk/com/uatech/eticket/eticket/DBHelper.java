@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import hk.com.uatech.eticket.eticket.database.Entrance;
 import hk.com.uatech.eticket.eticket.database.Show;
 
 /**
@@ -40,6 +41,10 @@ public class DBHelper extends SQLiteOpenHelper {
 
         // Create Show Table
         db.execSQL(Show.CREATE_TABLE);
+
+        // Create Entrance Log Table
+        // use for Boardway
+        db.execSQL(Entrance.CREATE_TABLE);
 
     }
 

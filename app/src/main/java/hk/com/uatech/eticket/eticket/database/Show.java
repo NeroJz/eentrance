@@ -3,15 +3,11 @@ package hk.com.uatech.eticket.eticket.database;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 
-import hk.com.uatech.eticket.eticket.DBHelper;
-import hk.com.uatech.eticket.eticket.Model;
 import hk.com.uatech.eticket.eticket.pojo.TicketInfo;
 
 public class Show extends Model {
@@ -46,37 +42,6 @@ public class Show extends Model {
     public static final String TG_CNAME = "tg_cname";
 
     public static final String CREATED_DATE = "created_date";
-
-
-
-//    // SHOW DETAILS
-//    public static final int SHOW_ID_COL = "show_id";
-//    public static final int SHOW_DATE_COL = "show_date";
-//    public static final int SHOW_NO_COL = "show_no";
-//
-//    // HOUSE DETAILS
-//    public static final int HOUSE_ID_COL = "house_id";
-//    public static final int HOUSE_ENAME_COL = "house_ename";
-//    public static final int HOUSE_CNAME_COL = "house_cname";
-//
-//    // CINEMA DETAILS
-//    public static final int CINEMA_ID_COL = "cinema_id";
-//    public static final int CINEMA_ENAME_COL = "cinema_ename";
-//    public static final int CINEMA_CNAME_COL = "cinema_cname";
-//
-//    // MOVIE DETAILS
-//    public static final int MOVIE_ID_COL = "movie_id";
-//    public static final int MOVIE_ENAME_COL = "movie_ename";
-//    public static final int MOVIE_CNAME_COL = "movie_cname";
-//    public static final int DURATION_COL = "duration";
-//    public static final int MV_ATTRIBUTES_COL = "mv_attributes";
-//
-//    // TICKET GROUP DETAILS
-//    public static final int TG_CODE_COL = "tg_code";
-//    public static final int TG_ENAME_COL = "tg_ename";
-//    public static final int TG_CNAME_COL = "tg_cname";
-//
-//    public static final int CREATED_DATE_COL = "created_date";
 
     public static final String CREATE_TABLE =
             "CREATE TABLE " +

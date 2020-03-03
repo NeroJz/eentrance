@@ -3595,6 +3595,10 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
         //debugMsg1();
 
         // Before show the loading, initialzie the printer first
+        /**
+         * Disable printing feature
+         */
+        /*
         if (isLocalDebug && isLocalSkipPrint) {
 
 
@@ -3702,6 +3706,10 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
             }
 
         }
+        */
+        /**
+         * End of Disable printing feature
+         */
 
 
         // Do nothing but close the dialog

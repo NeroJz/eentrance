@@ -18,13 +18,16 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import hk.com.uatech.eticket.eticket.pojo.TicketInfo;
 import hk.com.uatech.eticket.eticket.preferences.PreferencesController;
 import hk.com.uatech.eticket.eticket.qrCode.QRActivity;
 
-public class EntractStep1Activity extends QRActivity {    private ProgressDialog loading = null;
+public class EntractStep1Activity extends QRActivity {
+//    private ProgressDialog loading = null;
     private Button btnQRCode;
     private Button btnBack;
     private final int TASK_COMPLETED = 100;
@@ -63,6 +66,10 @@ public class EntractStep1Activity extends QRActivity {    private ProgressDialog
         findViewById(R.id.btnBack).setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(loading != null && loading.isShowing()) {
+                    loading.dismiss();
+                }
+
                 finish();
             }
         });
@@ -97,7 +104,7 @@ public class EntractStep1Activity extends QRActivity {    private ProgressDialog
                     public void onClick(View view) {
 //                        new IntentIntegrator(EntractStep1Activity.this).initiateScan();
 
-                        String test = "fKFHzkcuU5kqS4fA5uxNrGMDeIGo6pkgqqSDYJHPDHwHlDRM1Mvle0wmWcotSOSoVUemq7A/nXANA4MgT0l04iNFodXdSGH2niCve6dptanZ+bjnjKc7fNQapFvDU9gZmVNoYuDUKsn2R6lJaOfBcA2/bwWeSpwAdyR/eUvn0WQ=";
+                        String test = "bmQ5tXgJLKSIk6Nl2cFlrOo84DHoUlu8w7CmdY2O4xa7i9jErVPT3m4+0+BQpw+3sCsM0G18VEyA8/Yaj6w4xrL6FSxJjZtZdDpedmws5rgK1OEq1rKio5CDvGplH8KBj80j8Ba/Op7PnW8OnwX1wjv34LFtYtSlSNJMFgiBfnnijIvyiLWKrcxv8VriuWozK6tpx4WBCKs23y5QoZbs1sYMyDgOOy1pMKXvYMqPsE8=";
                         handleQrCode(test, true);
                     }
                 });
@@ -147,7 +154,7 @@ public class EntractStep1Activity extends QRActivity {    private ProgressDialog
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
             } else {
                 edtQrCode.setText(result.getContents());
-                handleQrCode(edtQrCode.getEditableText().toString());
+                handleQrCode(edtQrCode.getEditableText().toString(), true);
             }
         } else {
             switch (requestCode) {
@@ -178,7 +185,6 @@ public class EntractStep1Activity extends QRActivity {    private ProgressDialog
         // startActivity(intent);
         startActivityForResult(intent, RETURN_FROM_ADMIT_PAGE);
     }
-
 
     protected void cleanData() {
         edtQrCode.setText("");

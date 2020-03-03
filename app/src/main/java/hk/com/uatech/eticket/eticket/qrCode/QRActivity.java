@@ -2,6 +2,7 @@ package hk.com.uatech.eticket.eticket.qrCode;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -49,7 +50,7 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
     final private static int REMAIN_TICKET = 1;
     final private static int TOTAL_TICKET = 4;
 
-    private ProgressDialog loading = null;
+    public ProgressDialog loading = null;
 
     protected String refType = "";
 
@@ -225,6 +226,8 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
         int cinema_id = Integer.parseInt(parts[CINEMA_ID_INDEX]);
         int house_id = Integer.parseInt(parts[HOUSE_ID_INDEX]);
 
+        boolean is_concession = Integer.parseInt(parts[CONCESSION_TYPE_INDEX]) > 0 ? true : false;
+
         String show_date = parts[SHOW_DATE_INDEX];
 
         String[] showTime = show_date.split(" ");
@@ -267,16 +270,17 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
 
         SeatInfo[] seatInfoList = new SeatInfo[seatArray.length];
         for(int i=0; i < seatArray.length; i++) {
-//
-//            OfflineDatabase db = new OfflineDatabase(this);
-//            Item item = db.getRecordBySeatId(result.getTrans_id(), seatArray[i]);
-//
-//            SeatInfo seatInfo = new SeatInfo(seatArray[i], ticketTypeArray[i]);
-//            if(item != null) {
-//                seatInfo.setSeatStatus(item.getSeatStatus());
-//            }
+
+            OfflineDatabase db = new OfflineDatabase(this);
+            Item item = db.getRecordBySeatId(result.getTrans_id(), seatArray[i]);
 
             SeatInfo seatInfo = new SeatInfo(seatArray[i], ticketTypeArray[i]);
+            seatInfo.setConcession(is_concession);
+            if(item != null) {
+                seatInfo.setSeatStatus(item.getSeatStatus());
+            }
+
+//            SeatInfo seatInfo = new SeatInfo(seatArray[i], ticketTypeArray[i]);
             seatInfoList[i] = seatInfo;
         }
 

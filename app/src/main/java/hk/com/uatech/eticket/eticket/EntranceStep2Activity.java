@@ -66,9 +66,9 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import hk.com.uatech.eticket.eticket.database.Entrance;
 import hk.com.uatech.eticket.eticket.network.NetworkRepository;
 import hk.com.uatech.eticket.eticket.network.ResponseType;
-import hk.com.uatech.eticket.eticket.pojo.Entrance;
 import hk.com.uatech.eticket.eticket.pojo.SeatInfo;
 import hk.com.uatech.eticket.eticket.pojo.TicketTrans;
 import hk.com.uatech.eticket.eticket.preferences.PreferencesController;
@@ -903,15 +903,16 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
                                 .show();
                     }
                 } else {
-                    if ("MANAGER".equals(PreferencesController.getInstance().getUserRank())) {
-                        editSeatStatus();
-                    } else {
-                        Toast.makeText(
-                                EntranceStep2Activity.this,
-                                "unauthorized",
-                                Toast.LENGTH_LONG)
-                                .show();
-                    }
+//                    if ("MANAGER".equals(PreferencesController.getInstance().getUserRank())) {
+//                        editSeatStatus();
+//                    } else {
+//                        Toast.makeText(
+//                                EntranceStep2Activity.this,
+//                                "unauthorized",
+//                                Toast.LENGTH_LONG)
+//                                .show();
+//                    }
+                    editSeatStatus();
                 }
 //
 //                if ("MANAGER".equals(PreferencesController.getInstance().getUserRank())) {
@@ -3796,9 +3797,9 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
             // Selected, need to insert / update to DB as Invalid
             OfflineDatabase offline = new OfflineDatabase(EntranceStep2Activity.this);
             try {
-//                offline.accept(items);
+                offline.accept(items);
 
-                addEntranceLog();
+                addEntranceLog("in");
 
                 Toast.makeText(getApplicationContext(), "Save Successful", Toast.LENGTH_SHORT).show();
                 finish();
@@ -3946,11 +3947,18 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
     /**
      * Add EntranceLog to local db
      */
-    private void addEntranceLog() {
-        if(ticketTrans == null) return;
+    private void addEntranceLog(String logType) {
+        if(ticketTrans == null || checkedItems.size() == 0) return;
 
-        for(SeatInfo seat : checkedItems) {
-            Log.d(EntranceStep2Activity.class.toString(), seat.getSeatId() + "---" + seat.isChecked() + "----" + seat.isConcession());
+        Entrance entrance = new Entrance(EntranceStep2Activity.this);
+
+        try {
+            entrance.add(encryptRefNo, checkedItems, logType);
+        } catch (Exception e) {
+            String reason = e.getMessage();
+            Toast.makeText(getApplicationContext(), reason, Toast.LENGTH_SHORT).show();
+        } finally {
+            loading.dismiss();
         }
     }
 

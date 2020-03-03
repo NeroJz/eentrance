@@ -3305,10 +3305,7 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
                 ArrayList tmpList = (ArrayList) EntranceStep2Activity.this.ticketList.get(index);
                 ArrayList tmpIdList = (ArrayList) EntranceStep2Activity.this.ticketIdList.get(index);
                 ArrayList tmpState = (ArrayList) EntranceStep2Activity.this.ticketState.get(index);
-
-                Log.d(EntranceStep2Activity.class.toString(), tmpIdList.toString());
-                Log.d(EntranceStep2Activity.class.toString(), tmpIdList.get(position).toString());
-
+                
 
                 int status = (int) tmpList.get(position);
                 if (status == 0) {

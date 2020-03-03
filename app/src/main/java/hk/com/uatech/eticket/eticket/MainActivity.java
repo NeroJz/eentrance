@@ -1,6 +1,7 @@
 package hk.com.uatech.eticket.eticket;
 
 import android.Manifest;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Intent;
@@ -44,13 +45,14 @@ public class MainActivity extends AppCompatActivity {
 
         // Request External Storage Permission
         if(ContextCompat.checkSelfPermission(MainActivity.this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
             requestExternalStoragePermission();
-
             return;
         } else {
 
         }
+
         handleIntent();
     }
 

@@ -20,18 +20,27 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.internal.util.Predicate;
+import com.google.gson.Gson;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import hk.com.uatech.eticket.eticket.database.Entrance;
 import hk.com.uatech.eticket.eticket.network.NetworkRepository;
 import hk.com.uatech.eticket.eticket.network.ResponseType;
+import hk.com.uatech.eticket.eticket.pojo.SeatInfo;
+import hk.com.uatech.eticket.eticket.pojo.TicketTrans;
 import hk.com.uatech.eticket.eticket.preferences.PreferencesController;
+import hk.com.uatech.eticket.eticket.utils.Utils;
 
 public class EntraceStep3Activity extends AppCompatActivity implements NetworkRepository.QueryCallback {
 
@@ -46,6 +55,11 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
     private String refType = "";
 
     private String accessMode;
+
+
+    private TicketTrans ticketTrans;
+    private List<SeatInfo> entranceList = new ArrayList<SeatInfo>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,6 +113,21 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
         List foodQty = new ArrayList();
 
         try {
+
+            // Check jsonstr is defined
+            // Create ticketTrans from jsonstr
+            if(jsonstr != null && !(" ").equals(jsonstr)) {
+                Gson gson = new Gson();
+                ticketTrans = gson.fromJson(jsonstr, TicketTrans.class);
+            }
+
+            // Debug log checking
+            if(ticketTrans != null) {
+                for(SeatInfo seat : ticketTrans.getSeatInfoList()) {
+                    Log.d(EntraceStep3Activity.class.toString(), seat.getSeatId() + "---" + seat.getSeatStatus() + "---" + seat.isChecked());
+                }
+            }
+
             jsonObj = new JSONObject(jsonstr);
 
             resultMsg = jsonObj.getString("resultMsg");
@@ -401,32 +430,36 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
 
                                         }
                                     }
-                                    //}
-
-                                    OfflineDatabase offline = new OfflineDatabase(EntraceStep3Activity.this);
-                                    try {
-                                        offline.accept(items);
-                                        // Check result
-                                        Context context = getApplicationContext();
-                                        int duration = Toast.LENGTH_SHORT;
-                                        Toast toast = Toast.makeText(context, "Save Successful", duration);
-                                        toast.show();
-
-                                        finish();
-
-                                        //Item rec = offline.getRecordBySeatId(encryptRefNo,  tmpIdList.get(y).toString());
-                                    } catch (Exception esql) {
-                                        // Error during execution
-                                        Context context = getApplicationContext();
-                                        String reason = esql.getMessage();
-                                        int duration = Toast.LENGTH_SHORT;
-
-                                        Toast toast = Toast.makeText(context, reason, duration);
-                                        toast.show();
-                                    }
-
                                 }
 
+                            }
+
+                            OfflineDatabase offline = new OfflineDatabase(EntraceStep3Activity.this);
+
+                            try {
+                                // Hide offline saving
+                                offline.accept(items);
+
+                                // Add Entrance log
+                                addEntranceLog();
+
+                                // Check result
+                                Context context = getApplicationContext();
+                                int duration = Toast.LENGTH_SHORT;
+                                Toast toast = Toast.makeText(context, "Save Successful", duration);
+                                toast.show();
+
+                                finish();
+
+                                //Item rec = offline.getRecordBySeatId(encryptRefNo,  tmpIdList.get(y).toString());
+                            } catch (Exception esql) {
+                                // Error during execution
+                                Context context = getApplicationContext();
+                                String reason = esql.getMessage();
+                                int duration = Toast.LENGTH_SHORT;
+
+                                Toast toast = Toast.makeText(context, reason, duration);
+                                toast.show();
                             }
 
 
@@ -649,12 +682,13 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
             public void onItemClick(AdapterView<?> parent, View imgView, int position, long id) {
 
                 ArrayList tmpList = (ArrayList) EntraceStep3Activity.this.ticketList.get(index);
-                //ArrayList tmpIdList = (ArrayList) EntranceStep2Activity.this.ticketIdList.get(index);
+                ArrayList tmpIdList = (ArrayList) EntraceStep3Activity.this.ticketIdList.get(index);
                 ArrayList tmpState = (ArrayList) EntraceStep3Activity.this.ticketState.get(index);
 
 
                 int status = (int) tmpList.get(position);
                 int state = (int) tmpState.get(position);
+                String seatID = (String)tmpIdList.get(position);
 
                 ImageView image = (ImageView) imgView;
                 if (status == 0) {
@@ -667,6 +701,8 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
                         image.setImageResource(R.mipmap.notavailable);
                         tmpState.set(position, 0);
                     }
+
+                    addToEntranceList(seatID);
                 } else {
                     if (state == 0) {
 
@@ -676,6 +712,8 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
                         image.setImageResource(R.mipmap.free);
                         tmpState.set(position, 0);
                     }
+
+                    addToEntranceList(seatID);
                 }
 
                 ticketState.set(index, tmpState);
@@ -683,6 +721,59 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
             }
         });
     }
+
+
+    /**
+     * Add to Entrance list with based on seat id
+     * @param seatID
+     */
+    private void addToEntranceList(final String seatID) {
+        if(ticketTrans == null) return;
+
+        List<SeatInfo> seats = Arrays.asList(ticketTrans.getSeatInfoList());
+
+        Predicate<SeatInfo> matchSeatID = new Predicate<SeatInfo>() {
+            @Override
+            public boolean apply(SeatInfo seatInfo) {
+                return seatInfo.getSeatId().equals(seatID);
+            }
+        };
+
+        Collection<SeatInfo> result = Utils.filter(seats, matchSeatID);
+
+        if(result.size() == 0) return;
+
+        for(SeatInfo seat : result) {
+            seat.setChecked(!seat.isChecked());
+        }
+
+        entranceList.clear();
+        for(SeatInfo seat : seats){
+            if(seat.isChecked()) {
+                entranceList.add(seat);
+            }
+        }
+    }
+
+    /**
+     * Add records to SQLite
+     */
+    private void addEntranceLog() {
+        if(entranceList.size() == 0) return;
+
+        Entrance entrance = new Entrance(EntraceStep3Activity.this);
+
+        try {
+            entrance.add(encryptRefNo, entranceList);
+        } catch (Exception e) {
+            String msg = e.getMessage();
+            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+        } finally {
+            loading.dismiss();
+        }
+
+    }
+
 
     @Override
     public void onStop() {

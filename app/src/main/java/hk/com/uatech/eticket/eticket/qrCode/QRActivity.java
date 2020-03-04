@@ -145,7 +145,9 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
         imm.hideSoftInputFromWindow(getToken(), 0);
 
 
-        TicketTrans ticket = getTicketTrans(parts);
+        // Validate the Show time in local db
+        // Get the ticket trans info
+        TicketTrans ticket = getTicketTrans(parts, PreferencesController.getInstance().getAccessMode());
 
         if(ticket == null) {
             Toast.makeText(this, "Show not found!", Toast.LENGTH_SHORT).show();
@@ -220,7 +222,8 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
      * Date: 02-03-2020
      * Version: 0.0.1
      */
-    private TicketTrans getTicketTrans(String[] parts) {
+    private TicketTrans getTicketTrans(String[] parts, String mode) {
+
         int show_id = Integer.parseInt(parts[SHOW_ID_INDEX]);
         int trans_id = Integer.parseInt(parts[TRANS_ID_INDEX]);
         int cinema_id = Integer.parseInt(parts[CINEMA_ID_INDEX]);
@@ -272,12 +275,16 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
         for(int i=0; i < seatArray.length; i++) {
 
             OfflineDatabase db = new OfflineDatabase(this);
-            Item item = db.getRecordBySeatId(result.getTrans_id(), seatArray[i]);
 
             SeatInfo seatInfo = new SeatInfo(seatArray[i], ticketTypeArray[i]);
             seatInfo.setConcession(is_concession);
-            if(item != null) {
-                seatInfo.setSeatStatus(item.getSeatStatus());
+
+            // Check seat is stored in SQLite when it is OFFLINE
+            if("offline".equals(mode)) {
+                Item item = db.getRecordBySeatId(result.getTrans_id(), seatArray[i]);
+                if(item != null) {
+                    seatInfo.setSeatStatus(item.getSeatStatus());
+                }
             }
 
 //            SeatInfo seatInfo = new SeatInfo(seatArray[i], ticketTypeArray[i]);

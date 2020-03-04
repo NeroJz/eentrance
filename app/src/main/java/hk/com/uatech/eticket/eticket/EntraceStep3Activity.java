@@ -122,11 +122,11 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
             }
 
             // Debug log checking
-            if(ticketTrans != null) {
-                for(SeatInfo seat : ticketTrans.getSeatInfoList()) {
-                    Log.d(EntraceStep3Activity.class.toString(), seat.getSeatId() + "---" + seat.getSeatStatus() + "---" + seat.isChecked());
-                }
-            }
+//            if(ticketTrans != null) {
+//                for(SeatInfo seat : ticketTrans.getSeatInfoList()) {
+//                    Log.d(EntraceStep3Activity.class.toString(), seat.getSeatId() + "---" + seat.getSeatStatus() + "---" + seat.isChecked());
+//                }
+//            }
 
             jsonObj = new JSONObject(jsonstr);
 

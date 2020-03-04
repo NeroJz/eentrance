@@ -14,6 +14,8 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,6 +25,7 @@ import java.util.Map;
 
 import hk.com.uatech.eticket.eticket.network.NetworkRepository;
 import hk.com.uatech.eticket.eticket.network.ResponseType;
+import hk.com.uatech.eticket.eticket.pojo.Login;
 import hk.com.uatech.eticket.eticket.preferences.PreferencesController;
 import hk.com.uatech.eticket.eticket.preferences.SettingActivity;
 import hk.com.uatech.eticket.eticket.utils.Utils;
@@ -142,7 +145,7 @@ public class LoginActivity extends AppCompatActivity implements NetworkRepositor
 
                         jsonvalue.put("username", edtLoginId.getText());
                         jsonvalue.put("password", edtPassword.getText());
-                        jsonvalue.put("domainID", domainSpinner.getSelectedView().getTag());
+//                        jsonvalue.put("domainID", domainSpinner.getSelectedView().getTag());
 
                         loading.show();
                         NetworkRepository.getInstance().auth(jsonvalue.toString(), LoginActivity.this);
@@ -210,6 +213,9 @@ public class LoginActivity extends AppCompatActivity implements NetworkRepositor
 
 
                     if (resultCode == 200) {
+                        // Original code
+                        /*
+
                         String token = jsonObj.getString("token");
 
                         String pwd = edtPassword.getText().toString();
@@ -224,6 +230,20 @@ public class LoginActivity extends AppCompatActivity implements NetworkRepositor
                             int staffType = jsonObj.getInt("isManager");
                             PreferencesController.getInstance().setUserRank(staffType == 1 ? "MANAGER" : "OPERATION");
                         }
+
+                         */
+
+                        Gson gson = new Gson();
+                        Login login = gson.fromJson(jsonObj.toString(), Login.class);
+
+                        PreferencesController.getInstance().setAccessMode("online");
+
+                        String pwd = edtPassword.getText().toString();
+                        PreferencesController.getInstance().setUserPassword(pwd);
+
+                        PreferencesController.getInstance().setUserRank(login.isManager() ? "MANAGER" : "OPERATION");
+                        PreferencesController.getInstance().setSettingsEnabled(login.isManager() ? true : false);
+                        PreferencesController.getInstance().setUploadingEnabled(login.isManager() ? true : false);
 
                         edtLoginId.setText("");
                         edtPassword.setText("");

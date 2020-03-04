@@ -12,7 +12,12 @@ public enum ResponseType {
     ORDERACTION_4_UAT("orderAction"),//TASK_COMPLETED_4_UAT SKIP
     FB_ORDERACTION_4_UAT("orderAction"),//TASK_FB_ORDERACTION_4_UAT
     UPDATE_TICKET_TYPE("updateTicketType"),
-    GET_DOMAINS("adDomainList")
+    GET_DOMAINS("adDomainList"),
+
+    // Boardway APIs
+    GATE_ALL_HOUSE("GateGetAllHouse.php"),
+    GATE_LOGIN("GateLogin.php")
+
     ;
 
 

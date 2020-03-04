@@ -112,7 +112,7 @@
 
                                 android:inputType="textPersonName"
                                 android:paddingLeft="20dp"
-                                android:text="/thirdparty/api/e-entrance"
+                                android:text="/siteapi"
                                 android:textSize="14sp" />
                         </TableRow>
 

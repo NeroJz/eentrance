@@ -56,9 +56,14 @@ public class NetworkRepository {
     }
 
     public void auth(String parameters, final QueryCallback callback) {
+//        Call<String> stringCall = service
+//                .callUrl(
+//                        getCommonQuery(ResponseType.AUTH),
+//                        parameters);
+
         Call<String> stringCall = service
                 .callUrl(
-                        getCommonQuery(ResponseType.AUTH),
+                        getCommonQuery(ResponseType.GATE_LOGIN),
                         parameters);
         stringCall.enqueue(new BaseCallback(ResponseType.AUTH, callback));
     }

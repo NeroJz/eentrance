@@ -145,6 +145,8 @@ public class MenuActivity extends AppCompatActivity implements ShowtimeEvent, Ne
 
         String accessMode = PreferencesController.getInstance().getAccessMode();
 
+
+        /*
         if(accessMode.equals("online")) {
             Log.d(MenuActivity.class.toString(), "AccessMode: " + accessMode);
 
@@ -152,17 +154,7 @@ public class MenuActivity extends AppCompatActivity implements ShowtimeEvent, Ne
                 JSONObject jsonvalue = new JSONObject();
 
                 SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-//                final String str_date = df.format(new Date());
-
-
-                /**
-                 * Test Case
-                 */
-                Date parse = df.parse("2020-02-29");
-                final String str_date = df.format(parse);
-                /**
-                 * End of test case
-                 */
+                final String str_date = df.format(new Date());
 
                 jsonvalue.put("date", str_date);
                 NetworkRepository.getInstance().getGateShowList(jsonvalue.toString(), this);
@@ -186,6 +178,8 @@ public class MenuActivity extends AppCompatActivity implements ShowtimeEvent, Ne
 
             notifier.doWork(this);
         }
+         */
+        
     }
 
 

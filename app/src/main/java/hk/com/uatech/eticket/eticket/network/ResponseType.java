@@ -17,7 +17,7 @@ public enum ResponseType {
     // Boardway APIs
     GATE_LOGIN("GateLogin.php"),
     GATE_ALL_HOUSE("GateGetAllHouse.php"),
-    GATE_SHOW_LIST("GetAllShow.php"),
+    GATE_SHOW_LIST("GateGetAllShow.php"),
     GATE_VALIDATE_TICKET("GateValidateTicket.php"),
     GATE_IMPORT_ENTRANCE_LOG("GateImportEntranceLog.php"),
 

@@ -15,7 +15,10 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import hk.com.uatech.eticket.eticket.Item;
 import hk.com.uatech.eticket.eticket.OfflineDatabase;
@@ -56,6 +59,9 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
 
     protected String foodRefNo = "";
 
+    private List<String> houses = new ArrayList<String>();
+    private Gson gson = new Gson();
+
     protected abstract IBinder getToken();
     protected abstract void goNext(String json,
                                    String encryptRefNo,
@@ -65,7 +71,21 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        String str_permitted_house = PreferencesController.getInstance().getHousing();
+
+        if(!"".equals(str_permitted_house)) {
+            Log.d(QRActivity.class.toString(), str_permitted_house);
+            addToHouses(str_permitted_house);
+        }
+
     }
+
+
+    protected void addToHouses(String str_houses) {
+        String[] part = str_houses.split(",");
+        houses = Arrays.asList(part);
+    }
+
 
     protected void playSuccess() {
         this.invokeBGMusic(R.raw.valid);
@@ -145,6 +165,21 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
         imm.hideSoftInputFromWindow(getToken(), 0);
 
 
+        String qr_house_id = parts[HOUSE_ID_INDEX];
+
+        if(houses.size() > 0) {
+            if(!houses.contains(qr_house_id)) {
+                Toast.makeText(
+                        getApplicationContext(),
+                        "You are not allowed to update the data in this house!",
+                        Toast.LENGTH_SHORT).show();
+
+                return;
+            }
+        }
+
+
+
         // Validate the Show time in local db
         // Get the ticket trans info
         TicketTrans ticket = getTicketTrans(parts, PreferencesController.getInstance().getAccessMode());
@@ -166,7 +201,7 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
                 return;
             }
 
-            Gson gson = new Gson();
+
             String json = gson.toJson(ticket);
 
             Log.d(QRActivity.class.toString(), json);
@@ -189,6 +224,8 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
                 /**
                  * Test Case
                  */
+
+                /*
                 int remaining = TOTAL_TICKET - REMAIN_TICKET;
 
                 for(int i=0; i < remaining; i++) {
@@ -204,6 +241,8 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
                 Log.d(QRActivity.class.toString(), json);
 
                 goNext(json, Integer.toString(trans_id), refType, "");
+                 */
+
                 /**
                  * End of Test Case
                  */
@@ -225,6 +264,12 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
     private TicketTrans getTicketTrans(String[] parts, String mode) {
 
         int show_id = Integer.parseInt(parts[SHOW_ID_INDEX]);
+
+        /**
+         * Test case
+         */
+        show_id = 18143720;
+
         int trans_id = Integer.parseInt(parts[TRANS_ID_INDEX]);
         int cinema_id = Integer.parseInt(parts[CINEMA_ID_INDEX]);
         int house_id = Integer.parseInt(parts[HOUSE_ID_INDEX]);

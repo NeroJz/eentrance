@@ -25,6 +25,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -39,6 +41,8 @@ import hk.com.uatech.eticket.eticket.OfflineDatabase;
 import hk.com.uatech.eticket.eticket.R;
 import hk.com.uatech.eticket.eticket.network.NetworkRepository;
 import hk.com.uatech.eticket.eticket.network.ResponseType;
+import hk.com.uatech.eticket.eticket.pojo.GateHouse;
+import hk.com.uatech.eticket.eticket.pojo.House;
 
 public class SettingActivity extends AppCompatActivity implements NetworkRepository.QueryCallback {
     private Button btnUpload;
@@ -95,6 +99,9 @@ public class SettingActivity extends AppCompatActivity implements NetworkReposit
     private EditText edtOfflinePassword;
     private EditText edtUseShare;
     private EditText edtUsePrinter;
+
+
+    private Gson gson = new Gson();
 
 
     @Override
@@ -296,7 +303,10 @@ public class SettingActivity extends AppCompatActivity implements NetworkReposit
 
                 loading.show();
                 //JSONObject jsonObject = getJSONObjectFromURL(urlString, jsonvalue);
-                NetworkRepository.getInstance().getHouseList(jv.toString(), this);
+//                NetworkRepository.getInstance().getHouseList(jv.toString(), this);
+
+                NetworkRepository.getInstance().getGateAllHouse(this);
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -749,6 +759,87 @@ public class SettingActivity extends AppCompatActivity implements NetworkReposit
                                 .show();
                         return;
                     }
+
+                }
+
+                break;
+
+            /**
+             * Callbacks for the Turnstile
+             * Author: Jz
+             * Date: 05-03-2020
+             * Version: 0.0.1
+             */
+
+            case GATE_ALL_HOUSE:
+
+                if(result.isEmpty()) {
+                    Toast.makeText(getApplicationContext(),
+                            "Login Fail, please try again",
+                            Toast.LENGTH_SHORT).show();
+
+                } else if(result.startsWith("ERROR")) {
+                    String displayErr = result;
+                    displayErr = displayErr.replace("ERROR (400) : ", "");
+                    displayErr = displayErr.replace("ERROR (401) : ", "");
+                    displayErr = displayErr.replace("ERROR (402) : ", "");
+                    Toast.makeText(getApplicationContext(), displayErr, Toast.LENGTH_SHORT).show();
+
+                } else {
+
+                    try {
+                        GateHouse data = gson.fromJson(result, GateHouse.class);
+
+                        listShow = new ArrayList<>();
+                        list = new ArrayList<>();
+                        listvalue = new ArrayList<>();
+                        listSelected = new ArrayList<>();
+
+                        String[] arrSel = houseSetting.split(",");
+
+                        if(data != null && data.getHouse().length > 0) {
+                            for(House house : data.getHouse()) {
+                                list.add(house.getName().getEn());
+                                listvalue.add(house.getId());
+
+                                boolean found = false;
+
+                                for (String anArrSel : arrSel) {
+                                    if (house.getId().equals(anArrSel)) {
+                                        found = true;
+                                        break;
+                                    }
+                                }
+
+                                if (found) {
+                                    listShow.add(true);
+                                    listSelected.add("Y");
+                                } else {
+                                    listShow.add(false);
+                                    listSelected.add("N");
+                                }
+                            }
+                        }
+
+
+                        if (data != null && data.getHouse().length > 0) {
+                            ListAdapter adapterItem = new ListAdapter(this, list, listShow);
+                            listview.setAdapter(adapterItem);
+
+                            adapterItem.notifyDataSetChanged();
+                            setListViewHeightBasedOnChildren(listview);
+                        }
+
+
+                    }catch (Exception ec) {
+                        Toast.makeText(
+                                getApplicationContext(),
+                                "Error: " + ec.getMessage(),
+                                Toast.LENGTH_SHORT)
+                                .show();
+                        return;
+                    }
+
 
                 }
 

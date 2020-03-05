@@ -171,7 +171,7 @@ public class NetworkRepository {
      * Get All Houses
      * @param callback
      */
-    private void getGateAllHouse(QueryCallback callback) {
+    public void getGateAllHouse(QueryCallback callback) {
         Call<String> stringCall = service
                 .callUrl(
                         getCommonQuery(ResponseType.GATE_ALL_HOUSE)
@@ -184,7 +184,7 @@ public class NetworkRepository {
      * @param parameters
      * @param callback
      */
-    private void getGateShowList(String parameters, final QueryCallback callback) {
+    public void getGateShowList(String parameters, final QueryCallback callback) {
         Call<String> stringCall = service
                 .callUrl(
                         getCommonQuery(ResponseType.GATE_SHOW_LIST),
@@ -199,7 +199,7 @@ public class NetworkRepository {
      * @param parameters
      * @param callback
      */
-    private void getGateValidateTicket(String parameters, final QueryCallback callback) {
+    public void getGateValidateTicket(String parameters, final QueryCallback callback) {
         Call<String> stringCall = service
                 .callUrl(
                         getCommonQuery(ResponseType.GATE_VALIDATE_TICKET),
@@ -214,7 +214,7 @@ public class NetworkRepository {
      * @param parameters
      * @param callback
      */
-    private void getGateImportEntranceLog(String parameters, final QueryCallback callback) {
+    public void getGateImportEntranceLog(String parameters, final QueryCallback callback) {
         Call<String> stringCall = service
                 .callUrl(
                         getCommonQuery(ResponseType.GATE_IMPORT_ENTRANCE_LOG),

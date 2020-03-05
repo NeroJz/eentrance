@@ -369,7 +369,7 @@
 
 
                     <TextView
-                        android:visibility="gone"
+                        android:visibility="visible"
                         android:id="@+id/textView4"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -383,7 +383,7 @@
 
 
                     <ListView
-                        android:visibility="gone"
+                        android:visibility="visible"
                         android:id="@+id/houselist"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"

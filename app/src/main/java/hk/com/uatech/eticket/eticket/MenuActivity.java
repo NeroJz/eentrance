@@ -17,14 +17,28 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
+import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
+import hk.com.uatech.eticket.eticket.database.Show;
 import hk.com.uatech.eticket.eticket.delegate.showtime.ShowtimeEvent;
 import hk.com.uatech.eticket.eticket.delegate.showtime.ShowtimeNotifier;
+import hk.com.uatech.eticket.eticket.network.NetworkRepository;
+import hk.com.uatech.eticket.eticket.network.ResponseType;
+import hk.com.uatech.eticket.eticket.pojo.ShowPojo;
 import hk.com.uatech.eticket.eticket.preferences.PreferencesController;
 import hk.com.uatech.eticket.eticket.preferences.SettingActivity;
 
-public class MenuActivity extends AppCompatActivity implements ShowtimeEvent {
+public class MenuActivity extends AppCompatActivity implements ShowtimeEvent, NetworkRepository.QueryCallback {
 
     public static ProgressDialog loading = null;
+
+    private Gson gson = new Gson();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,6 +147,38 @@ public class MenuActivity extends AppCompatActivity implements ShowtimeEvent {
 
         if(accessMode.equals("online")) {
             Log.d(MenuActivity.class.toString(), "AccessMode: " + accessMode);
+
+            try {
+                JSONObject jsonvalue = new JSONObject();
+
+                SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+//                final String str_date = df.format(new Date());
+
+
+                /**
+                 * Test Case
+                 */
+                Date parse = df.parse("2020-02-29");
+                final String str_date = df.format(parse);
+                /**
+                 * End of test case
+                 */
+
+                jsonvalue.put("date", str_date);
+                NetworkRepository.getInstance().getGateShowList(jsonvalue.toString(), this);
+
+                showLoading();
+            } catch (Exception e) {
+
+                Toast.makeText(getApplication(),
+                        e.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+
+            } finally {
+                dismissLoad();
+            }
+
+
         } else if(accessMode.equals("offline")) {
             showLoading();
 
@@ -256,5 +302,52 @@ public class MenuActivity extends AppCompatActivity implements ShowtimeEvent {
         }
 
         super.onDestroy();
+    }
+
+    @Override
+    public void onResponse(ResponseType responseType, String result) {
+        switch (responseType) {
+            case GATE_SHOW_LIST:
+
+                if(result.startsWith("ERROR")) {
+                    String msg = "Failed to get show list.";
+
+                    Toast.makeText(getApplicationContext(),
+                            msg,
+                            Toast.LENGTH_SHORT).show();
+
+                    return;
+                }
+
+                try {
+                    ShowPojo response = gson.fromJson(result, ShowPojo.class);
+
+                    if(response != null && response.getShow().length > 0) {
+                        Show model = new Show(getApplicationContext());
+                        // Clear existing data
+                        model.clear();
+
+                        // Insert new data
+                        model.add_shows(response.getShow());
+
+                    } else {
+                        Toast.makeText(
+                                getApplicationContext(),
+                                "No show list available.",
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+
+                } catch (Exception e) {
+                    Toast.makeText(getApplicationContext(),
+                            e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+
+                    return;
+                }
+
+                break;
+        }
     }
 }

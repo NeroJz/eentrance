@@ -15,8 +15,12 @@ public enum ResponseType {
     GET_DOMAINS("adDomainList"),
 
     // Boardway APIs
-    GATE_ALL_HOUSE("GateGetAllHouse.php"),
     GATE_LOGIN("GateLogin.php"),
+    GATE_ALL_HOUSE("GateGetAllHouse.php"),
+    GATE_SHOW_LIST("GetAllShow.php"),
+    GATE_VALIDATE_TICKET("GateValidateTicket.php"),
+    GATE_IMPORT_ENTRANCE_LOG("GateImportEntranceLog.php"),
+
 
     ;
 

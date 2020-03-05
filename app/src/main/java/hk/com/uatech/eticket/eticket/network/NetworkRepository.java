@@ -158,4 +158,69 @@ public class NetworkRepository {
     public interface QueryCallback {
         void onResponse(ResponseType responseType, String result);
     }
+
+
+    /**
+     * The following contains API for Turnstile
+     * Author: Jz
+     * Date: 05-03-2020
+     * Version: 0.0.1
+     */
+
+    /**
+     * Get All Houses
+     * @param callback
+     */
+    private void getGateAllHouse(QueryCallback callback) {
+        Call<String> stringCall = service
+                .callUrl(
+                        getCommonQuery(ResponseType.GATE_ALL_HOUSE)
+                );
+        stringCall.enqueue(new BaseCallback(ResponseType.GATE_ALL_HOUSE, callback));
+    }
+
+    /**
+     * Get shows list of a day
+     * @param parameters
+     * @param callback
+     */
+    private void getGateShowList(String parameters, final QueryCallback callback) {
+        Call<String> stringCall = service
+                .callUrl(
+                        getCommonQuery(ResponseType.GATE_SHOW_LIST),
+                        parameters);
+
+        stringCall.enqueue(new BaseCallback(ResponseType.GATE_SHOW_LIST, callback));
+    }
+
+
+    /**
+     * Admit/Exit a seat
+     * @param parameters
+     * @param callback
+     */
+    private void getGateValidateTicket(String parameters, final QueryCallback callback) {
+        Call<String> stringCall = service
+                .callUrl(
+                        getCommonQuery(ResponseType.GATE_VALIDATE_TICKET),
+                        parameters);
+
+        stringCall.enqueue(new BaseCallback(ResponseType.GATE_VALIDATE_TICKET, callback));
+    }
+
+
+    /**
+     * Import the entrance log (after Internet resumes)
+     * @param parameters
+     * @param callback
+     */
+    private void getGateImportEntranceLog(String parameters, final QueryCallback callback) {
+        Call<String> stringCall = service
+                .callUrl(
+                        getCommonQuery(ResponseType.GATE_IMPORT_ENTRANCE_LOG),
+                        parameters);
+
+        stringCall.enqueue(new BaseCallback(ResponseType.GATE_IMPORT_ENTRANCE_LOG, callback));
+    }
+
 }

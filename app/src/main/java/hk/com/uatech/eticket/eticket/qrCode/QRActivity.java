@@ -15,6 +15,8 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import org.json.JSONObject;
+
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,17 +39,33 @@ import hk.com.uatech.eticket.eticket.preferences.PreferencesController;
 
 public abstract class QRActivity extends AppCompatActivity implements NetworkRepository.QueryCallback {
 
-    final private static int ACTION_INDEX = 0;
+//    final private static int ACTION_INDEX = 0;
+//    final private static int TRANS_ID_INDEX = 1;
+//    final private static int CINEMA_ID_INDEX = 2;
+//    final private static int HOUSE_ID_INDEX = 3;
+//    final private static int SHOW_ID_INDEX = 4;
+//    final private static int SHOW_DATE_INDEX = 5;
+//    final private static int MOVIE_ID_INDEX = 6;
+//    final private static int MOVIE_CTG_INDEX = 7;
+//    final private static int SEAT_NO_INDEX = 8;
+//    final private static int TICKET_TYPE_INDEX = 9;
+//    final private static int CONCESSION_TYPE_INDEX = 10;
+
+
+    final private static int OPERATION_BIT_INDEX = 0;
     final private static int TRANS_ID_INDEX = 1;
     final private static int CINEMA_ID_INDEX = 2;
-    final private static int HOUSE_ID_INDEX = 3;
-    final private static int SHOW_ID_INDEX = 4;
-    final private static int SHOW_DATE_INDEX = 5;
-    final private static int MOVIE_ID_INDEX = 6;
-    final private static int MOVIE_CTG_INDEX = 7;
-    final private static int SEAT_NO_INDEX = 8;
-    final private static int TICKET_TYPE_INDEX = 9;
-    final private static int CONCESSION_TYPE_INDEX = 10;
+    final private static int CINEMA_NAME_INDEX = 3;
+    final private static int HOUSE_ID_INDEX = 4;
+    final private static int HOUSE_NAME_INDEX = 5;
+    final private static int MOVIE_NAME_ZH_INDEX = 6;
+    final private static int MOVIE_NAME_EN_INDEX = 7;
+    final private static int MOVIE_CATEGORY_INDEX = 8;
+    final private static int SHOW_DATE_INDEX = 9;
+    final private static int SEAT_NO_LIST_INDEX = 10;
+    final private static int FULL_SEAT_INDEX = 11;
+    final private static int TICKET_TYPE_INDEX = 12;
+    final private static int CONCESSION_BIT_INDEX = 13;
 
 
     final private static int REMAIN_TICKET = 1;
@@ -59,6 +77,7 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
 
     protected String foodRefNo = "";
 
+    private String savedCinemaID = "";
     private List<String> houses = new ArrayList<String>();
     private Gson gson = new Gson();
 
@@ -73,14 +92,26 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
         super.onCreate(savedInstanceState);
         String str_permitted_house = PreferencesController.getInstance().getHousing();
 
+        savedCinemaID = PreferencesController.getInstance().getCinemaId();
+
         if(!"".equals(str_permitted_house)) {
-            Log.d(QRActivity.class.toString(), str_permitted_house);
+//            Log.d(QRActivity.class.toString(), str_permitted_house);
             addToHouses(str_permitted_house);
+        } else {
+            Toast.makeText(
+                    getApplicationContext(),
+                    "You are not allowed to update the data. Please check the selected house(s) on Setting page.",
+                    Toast.LENGTH_LONG).show();
+            return;
         }
 
     }
 
 
+    /**
+     * Add House ID to houses
+     * @param str_houses
+     */
     protected void addToHouses(String str_houses) {
         String[] part = str_houses.split(",");
         houses = Arrays.asList(part);
@@ -151,8 +182,7 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
             return;
         }
 
-        int action_id = Integer.parseInt(parts[ACTION_INDEX]);
-
+        int action_id = Integer.parseInt(parts[OPERATION_BIT_INDEX]);
         int trans_id = Integer.parseInt(parts[TRANS_ID_INDEX]);
 
         if(action_id != 1) {
@@ -166,47 +196,44 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
 
 
         String qr_house_id = parts[HOUSE_ID_INDEX];
+        String cinema_id = parts[CINEMA_ID_INDEX];
 
-        if(houses.size() > 0) {
-            if(!houses.contains(qr_house_id)) {
-                Toast.makeText(
-                        getApplicationContext(),
-                        "You are not allowed to update the data in this house!",
-                        Toast.LENGTH_SHORT).show();
-
-                return;
-            }
-        }
-
-
-
-        // Validate the Show time in local db
-        // Get the ticket trans info
-        TicketTrans ticket = getTicketTrans(parts, PreferencesController.getInstance().getAccessMode());
-
-        if(ticket == null) {
-            Toast.makeText(this, "Show not found!", Toast.LENGTH_SHORT).show();
+        if(!isValid(qr_house_id, cinema_id)) {
             return;
         }
 
 
         if("offline".compareTo(PreferencesController.getInstance().getAccessMode()) == 0) {
 
-            if(parts.length <= 1) {
-                Context context = getApplicationContext();
-                CharSequence text = "Offline doesn't support manual input! Please scan the QR code";
+            // Validate the Show time in local db
+            // Get the ticket trans info
+            try {
+                TicketTrans ticket = getTicketTrans(parts, PreferencesController.getInstance().getAccessMode());
 
-                Toast toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
-                toast.show();
+                if(ticket == null) {
+                    Toast.makeText(this, "Show not found!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if(parts.length <= 1) {
+                    Context context = getApplicationContext();
+                    CharSequence text = "Offline doesn't support manual input! Please scan the QR code";
+
+                    Toast toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
+                    toast.show();
+                    return;
+                }
+
+
+                String json = gson.toJson(ticket);
+
+                Log.d(QRActivity.class.toString(), json);
+
+                goNext(json, Integer.toString(trans_id), refType, "");
+            } catch (Exception e) {
+                Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                 return;
             }
-
-
-            String json = gson.toJson(ticket);
-
-            Log.d(QRActivity.class.toString(), json);
-
-            goNext(json, Integer.toString(trans_id), refType, "");
 
         } else { // Online mode
 
@@ -220,11 +247,24 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
 
                 loading.show();
 
+                // Validate the Show time in local db
+                // Get the ticket trans info
+                TicketTrans ticket = getTicketTrans(parts, PreferencesController.getInstance().getAccessMode());
+                if(ticket == null) {
+                    Toast.makeText(this, "Show not found!", Toast.LENGTH_SHORT).show();
+                    loading.dismiss();
+                    return;
+                }
+
+
                 // CALL API
+                String json = gson.toJson(ticket);
+
+                goNext(json, Integer.toString(trans_id), refType, "");
+
                 /**
                  * Test Case
                  */
-
                 /*
                 int remaining = TOTAL_TICKET - REMAIN_TICKET;
 
@@ -248,7 +288,11 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
                  */
 
             } catch (Exception e) {
-                e.printStackTrace();
+                Toast.makeText(getApplicationContext(),
+                        e.getMessage(), Toast.LENGTH_SHORT).show();
+                return;
+            } finally {
+                loading.dismiss();
             }
 
         }
@@ -256,58 +300,106 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
     }
 
     /**
-     * Get ticket trans
-     * Author: Jz
-     * Date: 02-03-2020
-     * Version: 0.0.1
+     * Check scanned House and Cinema ID
+     * against Preference
+     * @param houseID
+     * @param cinemaID
+     * @return
+     */
+    private boolean isValid(String houseID, String cinemaID) {
+
+        if(savedCinemaID == "") {
+            Toast.makeText(
+                    getApplicationContext(),
+                    "You are not allowed to update the data. Please check the Cinema ID on Setting page.",
+                    Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if(houses.size() == 0) {
+            Toast.makeText(
+                    getApplicationContext(),
+                    "You are not allowed to update the data. Please check the selected house(s) on Setting page.",
+                    Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if(!savedCinemaID.equals(cinemaID)) {
+            Toast.makeText(
+                    getApplicationContext(),
+                    "Invalid cinema ID from QR code!",
+                    Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if(!houses.contains(houseID)) {
+            Toast.makeText(
+                    getApplicationContext(),
+                    "You are not allowed to update the data in this house!",
+                    Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+
+        return true;
+    }
+
+    /**
+     * Get ticket transaction
+     * @param parts
+     * @param mode
+     * @return
      */
     private TicketTrans getTicketTrans(String[] parts, String mode) {
 
-        int show_id = Integer.parseInt(parts[SHOW_ID_INDEX]);
+        String trans_id = parts[TRANS_ID_INDEX];
 
-        /**
-         * Test case
-         */
-        show_id = 18143720;
+        String house_id = parts[HOUSE_ID_INDEX];
+        String house_name = parts[HOUSE_NAME_INDEX];
 
-        int trans_id = Integer.parseInt(parts[TRANS_ID_INDEX]);
-        int cinema_id = Integer.parseInt(parts[CINEMA_ID_INDEX]);
-        int house_id = Integer.parseInt(parts[HOUSE_ID_INDEX]);
 
-        boolean is_concession = Integer.parseInt(parts[CONCESSION_TYPE_INDEX]) > 0 ? true : false;
+        String cinema_id = parts[CINEMA_ID_INDEX];
+        String cinema_name = parts[CINEMA_NAME_INDEX];
+
+        String movie_ename = parts[MOVIE_NAME_EN_INDEX];
+        String movie_cname = parts[MOVIE_NAME_ZH_INDEX];
+        String movie_ctg = parts[MOVIE_CATEGORY_INDEX];
 
         String show_date = parts[SHOW_DATE_INDEX];
 
         String[] showTime = show_date.split(" ");
 
 
-        int movie_id = Integer.parseInt(parts[MOVIE_ID_INDEX]);
-        String movie_ctg = parts[MOVIE_CTG_INDEX];
-        String seat = parts[SEAT_NO_INDEX];
+        String seat = parts[SEAT_NO_LIST_INDEX];
+        String full_seats = parts[FULL_SEAT_INDEX];
         String ticket_type = parts[TICKET_TYPE_INDEX];
 
+        boolean is_concession = Integer.parseInt(parts[CONCESSION_BIT_INDEX]) > 0 ? true : false;
 
-        Show model = new Show(this);
+        TicketInfo ticketInfo = new TicketInfo(
+                trans_id,
+                show_date,
+                house_id,
+                house_name,
+                cinema_id,
+                cinema_name,
+                movie_ename,
+                movie_cname,
+                movie_ctg,
+                ticket_type,
+                seat,
+                full_seats
+        );
 
-        TicketInfo result = model.validate(show_id, cinema_id);
-
-        if(result == null) {
-            return null;
-        }
-
-        result.setTrans_id(Integer.toString(trans_id));
-        result.setMovie_ctg(movie_ctg);
-        result.setSeat(seat);
-        result.setTicket_type(ticket_type);
 
         TransInfo[] transInfoList = new TransInfo[1];
         transInfoList[0] = new TransInfo(
-                result.getTrans_id(),
-                result.getMovie_ename(),
+                ticketInfo.getTrans_id(),
+                ticketInfo.getMovie_ename(),
                 movie_ctg,
-                result.getHouse_id(),
-                result.getHouse_ename(),
-                result.getCinema_ename(),
+                ticketInfo.getHouse_id(),
+                ticketInfo.getHouse_ename(),
+                ticketInfo.getCinema_ename(),
                 showTime[0],
                 showTime[1]
         );
@@ -326,13 +418,12 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
 
             // Check seat is stored in SQLite when it is OFFLINE
             if("offline".equals(mode)) {
-                Item item = db.getRecordBySeatId(result.getTrans_id(), seatArray[i]);
+                Item item = db.getRecordBySeatId(ticketInfo.getTrans_id(), seatArray[i]);
                 if(item != null) {
                     seatInfo.setSeatStatus(item.getSeatStatus());
                 }
             }
 
-//            SeatInfo seatInfo = new SeatInfo(seatArray[i], ticketTypeArray[i]);
             seatInfoList[i] = seatInfo;
         }
 
@@ -343,6 +434,16 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
         ticket.setSeatInfoList(seatInfoList);
 
         return ticket;
+    }
+
+
+
+    private void validateTicket(TicketTrans ticket) {
+
+        JSONObject jsonObject = new JSONObject();
+//        jsonObject.put();
+
+//        NetworkRepository.getInstance().getGateValidateTicket();
     }
 
 

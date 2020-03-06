@@ -65,6 +65,9 @@ public class PreferencesController {
     private static String OFFLINE_PASSWORD;
 
 
+    private static final String CINEMA_ID = "cinema_id";
+
+
 
     public static PreferencesController getInstance() {
         return instance;
@@ -404,6 +407,18 @@ public class PreferencesController {
 
     public void setCheckByPermission(boolean value) {
         sharedPreferences.edit().putBoolean(KEY_CHECK_UPLOAD_BY_PERMISSION, value).apply();
+    }
+
+    /**
+     * Set / Get cinema id
+     * @return
+     */
+    public String getCinemaId() {
+        return sharedPreferences.getString(CINEMA_ID, "");
+    }
+
+    public void setCinemaId(String value) {
+        sharedPreferences.edit().putString(CINEMA_ID, value).apply();
     }
 
 }

@@ -43,6 +43,7 @@ import hk.com.uatech.eticket.eticket.network.NetworkRepository;
 import hk.com.uatech.eticket.eticket.network.ResponseType;
 import hk.com.uatech.eticket.eticket.pojo.GateHouse;
 import hk.com.uatech.eticket.eticket.pojo.House;
+import hk.com.uatech.eticket.eticket.utils.Utils;
 
 public class SettingActivity extends AppCompatActivity implements NetworkRepository.QueryCallback {
     private Button btnUpload;
@@ -100,6 +101,8 @@ public class SettingActivity extends AppCompatActivity implements NetworkReposit
     private EditText edtUseShare;
     private EditText edtUsePrinter;
 
+    private EditText edtCinemaID;
+
 
     private Gson gson = new Gson();
 
@@ -152,7 +155,6 @@ public class SettingActivity extends AppCompatActivity implements NetworkReposit
 
         btnUpload = (Button) findViewById(R.id.btnUpload);
 
-
         LinearLayout bglayer = (LinearLayout) findViewById(R.id.bglayer);
         TextView textView4 = (TextView) findViewById(R.id.textView4);
 
@@ -199,6 +201,16 @@ public class SettingActivity extends AppCompatActivity implements NetworkReposit
         String networkPassword = PreferencesController.getInstance().getNetworkPassword();
 
         String offlinepassword = PreferencesController.getInstance().getOfflinePassword();
+
+
+        // Set cinemaID if existed
+        edtCinemaID = (EditText) findViewById(R.id.tvCinemaID);
+
+        String cinemaID = PreferencesController.getInstance().getCinemaId();
+        if("".equals(cinemaID)) {
+            cinemaID = Utils.getConfigValue(getApplicationContext(), "cinema_id");
+        }
+        edtCinemaID.setText(cinemaID);
 
 
         btnUpload = (Button) findViewById(R.id.btnUpload);
@@ -452,6 +464,10 @@ public class SettingActivity extends AppCompatActivity implements NetworkReposit
                 String useprinter = edtUsePrinter.getEditableText().toString();
 
 
+                // Get cinemaID from edit text field
+                String cinemaID = edtCinemaID.getEditableText().toString();
+
+
                 try {
                     Integer.parseInt(graceFrom);
                     Integer.parseInt(graceTo);
@@ -521,6 +537,9 @@ public class SettingActivity extends AppCompatActivity implements NetworkReposit
 
                 PreferencesController.getInstance().setUseShare(useshare);
                 PreferencesController.getInstance().setUsePrinter(useprinter);
+
+                // Save cinema id
+                PreferencesController.getInstance().setCinemaId(cinemaID);
 
 
                 if ("Y".compareTo(setupMode) != 0 &&

@@ -437,6 +437,7 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
         ticket.setTransInfoList(transInfoList);
         ticket.setSeatInfoList(seatInfoList);
         ticket.setTrans_id(trans_id);
+        ticket.setConcession(is_concession);
 
         return ticket;
     }
@@ -508,6 +509,8 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
                                 "1".equals(gate_seat.getIsScannedIn())) {
                             seat.setSeatStatus("Invalid");
                         }
+
+                        seat.setConcession(transaction.isConcession());
 
                         seatInfoArrayList.add(seat);
                     }

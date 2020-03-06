@@ -815,7 +815,7 @@ public class SettingActivity extends AppCompatActivity implements NetworkReposit
                         listSelected = new ArrayList<>();
 
                         String[] arrSel = houseSetting.split(",");
-                        
+
 
                         if(data != null && data.getHouse().length > 0) {
                             for(House house : data.getHouse()) {
@@ -831,6 +831,15 @@ public class SettingActivity extends AppCompatActivity implements NetworkReposit
                                     }
                                 }
 
+                                if (found) {
+                                    listShow.add(true);
+                                    listSelected.add("Y");
+                                } else {
+                                    listShow.add(false);
+                                    listSelected.add("N");
+                                }
+
+                                /*
                                 if("".equals(houseSetting)) {
                                     listShow.add(true);
                                     listSelected.add("Y");
@@ -843,6 +852,7 @@ public class SettingActivity extends AppCompatActivity implements NetworkReposit
                                         listSelected.add("N");
                                     }
                                 }
+                                 */
                             }
                         }
 

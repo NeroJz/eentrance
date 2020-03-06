@@ -20,7 +20,7 @@ public enum ResponseType {
     GATE_SHOW_LIST("GateGetAllShow.php"),
     GATE_VALIDATE_TICKET("GateValidateTicket.php"),
     GATE_IMPORT_ENTRANCE_LOG("GateImportEntranceLog.php"),
-
+    GATE_GET_TRANSACTION_INFO("GateGetTransactionInfo.php"),
 
     ;
 

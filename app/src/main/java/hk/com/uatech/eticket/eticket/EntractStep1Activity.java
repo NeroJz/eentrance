@@ -104,7 +104,7 @@ public class EntractStep1Activity extends QRActivity {
                     public void onClick(View view) {
 //                        new IntentIntegrator(EntractStep1Activity.this).initiateScan();
 
-                        String test = "bmQ5tXgJLKSIk6Nl2cFlrOo84DHoUlu8w7CmdY2O4xa7i9jErVPT3m4+0+BQpw+3sCsM0G18VEyA8/Yaj6w4xrL6FSxJjZtZdDpedmws5rgK1OEq1rKio5CDvGplH8KBj80j8Ba/Op7PnW8OnwX1wjv34LFtYtSlSNJMFgiBfnnijIvyiLWKrcxv8VriuWozK6tpx4WBCKs23y5QoZbs1sYMyDgOOy1pMKXvYMqPsE8=";
+                        String test = "ky1dpJXxPZWeiNZL+aTnTmPEeIDtS0NcKT+tvMklWTf1nFh6vn1n+ezv7OE6+q+gYpO0VSv610l3gA10mEAGmjfs7izIk4T4nmzIXkuLx9tVR/X02dBeTlYOsb/3EwxYURTp5xv1xd6z9jw1W9t2crlA/zuWmu+Cjgh6+WMdO48vE16AtuUHzaTWIExDEKY2CLPRcEpDghMFzM3OIuJlUwazK3neIvPzyEbAY7Qa16RuRoIl9AMOW9bAjh9MU3E2iIlHmsiDR8BZXX9ZHv8hRnzWHKJKj5yh9rBeldwKrWQF/mhD3XD1WsM1CjT34OZJaZhI9KYu61QK1Jg3KBRJ/IxiXKgeiO3RAwfpGfx3jgA=";
                         handleQrCode(test, true);
                     }
                 });

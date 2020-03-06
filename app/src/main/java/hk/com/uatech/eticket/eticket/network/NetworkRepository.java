@@ -223,4 +223,19 @@ public class NetworkRepository {
         stringCall.enqueue(new BaseCallback(ResponseType.GATE_IMPORT_ENTRANCE_LOG, callback));
     }
 
+
+    /**
+     * Get the transaction info before admit/exit
+     * call after scanning
+     * @param parameters
+     * @param callback
+     */
+    public void getGateGetTransactionInfo(String parameters, final QueryCallback callback) {
+        Call<String> stringCall = service
+                .callUrl(
+                        getCommonQuery(ResponseType.GATE_GET_TRANSACTION_INFO),
+                        parameters);
+        stringCall.enqueue(new BaseCallback(ResponseType.GATE_GET_TRANSACTION_INFO, callback));
+    }
+
 }

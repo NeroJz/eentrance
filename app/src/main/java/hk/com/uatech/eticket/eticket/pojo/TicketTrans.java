@@ -8,6 +8,8 @@ public class TicketTrans {
     private SeatInfo[] seatInfoList;
     private boolean isConcession = false;
 
+    private String trans_id;
+
 
     public String getResultCode() {
         return resultCode;
@@ -47,5 +49,13 @@ public class TicketTrans {
 
     public void setConcession(boolean concession) {
         isConcession = concession;
+    }
+
+    public String getTrans_id() {
+        return trans_id;
+    }
+
+    public void setTrans_id(String trans_id) {
+        this.trans_id = trans_id;
     }
 }

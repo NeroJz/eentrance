@@ -9,6 +9,7 @@ import android.os.IBinder;
 import android.os.Vibrator;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
@@ -17,6 +18,7 @@ import com.google.gson.Gson;
 
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +33,8 @@ import hk.com.uatech.eticket.eticket.network.NetworkRepository;
 
 import hk.com.uatech.eticket.eticket.network.NetworkRepository;
 import hk.com.uatech.eticket.eticket.network.ResponseType;
+import hk.com.uatech.eticket.eticket.pojo.GateSeatInfo;
+import hk.com.uatech.eticket.eticket.pojo.GateTransactionInfo;
 import hk.com.uatech.eticket.eticket.pojo.SeatInfo;
 import hk.com.uatech.eticket.eticket.pojo.TicketInfo;
 import hk.com.uatech.eticket.eticket.pojo.TicketTrans;
@@ -81,11 +85,15 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
     private List<String> houses = new ArrayList<String>();
     private Gson gson = new Gson();
 
+    // Store ticket transaction
+    private TicketTrans transaction;
+
     protected abstract IBinder getToken();
     protected abstract void goNext(String json,
                                    String encryptRefNo,
                                    String refType,
                                    String foodRefNo);
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -202,16 +210,17 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
             return;
         }
 
+        transaction = getTicketTrans(parts, PreferencesController.getInstance().getAccessMode());
+
 
         if("offline".compareTo(PreferencesController.getInstance().getAccessMode()) == 0) {
 
             // Validate the Show time in local db
             // Get the ticket trans info
             try {
-                TicketTrans ticket = getTicketTrans(parts, PreferencesController.getInstance().getAccessMode());
 
-                if(ticket == null) {
-                    Toast.makeText(this, "Show not found!", Toast.LENGTH_SHORT).show();
+                if(transaction == null) {
+                    Toast.makeText(this, "Invalid transaction!", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -224,15 +233,17 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
                     return;
                 }
 
-
-                String json = gson.toJson(ticket);
+                String json = gson.toJson(transaction);
 
                 Log.d(QRActivity.class.toString(), json);
 
-                goNext(json, Integer.toString(trans_id), refType, "");
+                goNext(json, transaction.getTrans_id(), refType, "");
+
             } catch (Exception e) {
                 Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                 return;
+            } finally {
+                loading.dismiss();
             }
 
         } else { // Online mode
@@ -249,18 +260,14 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
 
                 // Validate the Show time in local db
                 // Get the ticket trans info
-                TicketTrans ticket = getTicketTrans(parts, PreferencesController.getInstance().getAccessMode());
-                if(ticket == null) {
-                    Toast.makeText(this, "Show not found!", Toast.LENGTH_SHORT).show();
+                if(transaction == null) {
+                    Toast.makeText(this, "Invalid transaction!", Toast.LENGTH_SHORT).show();
                     loading.dismiss();
                     return;
                 }
 
-
                 // CALL API
-                String json = gson.toJson(ticket);
-
-                goNext(json, Integer.toString(trans_id), refType, "");
+                getGateTransactionInfo(parts[TRANS_ID_INDEX]);
 
                 /**
                  * Test Case
@@ -291,12 +298,9 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
                 Toast.makeText(getApplicationContext(),
                         e.getMessage(), Toast.LENGTH_SHORT).show();
                 return;
-            } finally {
-                loading.dismiss();
             }
 
         }
-
     }
 
     /**
@@ -432,18 +436,28 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
         ticket.setResultMsg("Success");
         ticket.setTransInfoList(transInfoList);
         ticket.setSeatInfoList(seatInfoList);
+        ticket.setTrans_id(trans_id);
 
         return ticket;
     }
 
 
+    /**
+     * Get Transaction Info from Gate
+     * @param transID
+     * @throws Exception
+     */
+    private void getGateTransactionInfo(String transID) throws Exception {
 
-    private void validateTicket(TicketTrans ticket) {
+        if(transaction == null) {
+            throw new Exception("Transaction not found!");
+        }
 
-        JSONObject jsonObject = new JSONObject();
-//        jsonObject.put();
+        JSONObject jsonVal = new JSONObject();
+        jsonVal.put("trans_id", transID);
 
-//        NetworkRepository.getInstance().getGateValidateTicket();
+        NetworkRepository.getInstance().getGateGetTransactionInfo(jsonVal.toString(), this);
+
     }
 
 
@@ -455,8 +469,57 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
      */
     @Override
     public void onResponse(ResponseType responseType, String result) {
+
         if (loading != null) {
             loading.dismiss(); // dismiss loading
+        }
+
+        switch (responseType) {
+            case GATE_GET_TRANSACTION_INFO:
+
+                if(TextUtils.isEmpty(result)) {
+                    Toast.makeText(getApplicationContext(),
+                            "Please try another ticket!",
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if(result.startsWith("ERROR")) {
+                    Toast.makeText(getApplicationContext(),
+                            "Could not get transaction info!",
+                            Toast.LENGTH_SHORT
+                    ).show();
+
+                    return;
+                }
+
+                GateTransactionInfo transactionInfo = gson.fromJson(result, GateTransactionInfo.class);
+
+                ArrayList<SeatInfo> seatInfoArrayList = new ArrayList<SeatInfo>();
+
+                if(transactionInfo.getSeat().length > 0) {
+                    for(GateSeatInfo gate_seat : transactionInfo.getSeat()) {
+                        SeatInfo seat = new SeatInfo(
+                                gate_seat.getSeat_no(),
+                                gate_seat.getTicket().getName().getEn()
+                        );
+
+                        if("1".equals(gate_seat.getIsRefunded()) ||
+                                "1".equals(gate_seat.getIsScannedIn())) {
+                            seat.setSeatStatus("Invalid");
+                        }
+
+                        seatInfoArrayList.add(seat);
+                    }
+                }
+
+                SeatInfo[] seatInfo = seatInfoArrayList.toArray(new SeatInfo[seatInfoArrayList.size()]);
+                transaction.setSeatInfoList(seatInfo);
+
+                String json = gson.toJson(transaction);
+                goNext(json, transaction.getTrans_id(), refType, "");
+
+                break;
         }
     }
 }

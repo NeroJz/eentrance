@@ -1,5 +1,9 @@
 package hk.com.uatech.eticket.eticket.pojo;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class TicketTrans {
 
     private String resultCode;
@@ -9,6 +13,10 @@ public class TicketTrans {
     private boolean isConcession = false;
 
     private String trans_id;
+
+    private Map<String, List<String>> logIn = new HashMap<String, List<String>>();
+    private Map<String, List<String>> logOut = new HashMap<String, List<String>>();
+
 
 
     public String getResultCode() {
@@ -57,5 +65,21 @@ public class TicketTrans {
 
     public void setTrans_id(String trans_id) {
         this.trans_id = trans_id;
+    }
+
+    public Map<String, List<String>> getLogIn() {
+        return logIn;
+    }
+
+    public void setLogIn(Map<String, List<String>> logIn) {
+        this.logIn = logIn;
+    }
+
+    public Map<String, List<String>> getLogOut() {
+        return logOut;
+    }
+
+    public void setLogOut(Map<String, List<String>> logOut) {
+        this.logOut = logOut;
     }
 }

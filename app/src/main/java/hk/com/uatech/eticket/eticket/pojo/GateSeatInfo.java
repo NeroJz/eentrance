@@ -7,6 +7,7 @@ public class GateSeatInfo {
     private String isScannedIn;
     private Price price;
     private Ticket ticket;
+    private Log log;
 
     public String getSeat_no() {
         return seat_no;
@@ -46,5 +47,13 @@ public class GateSeatInfo {
 
     public void setTicket(Ticket ticket) {
         this.ticket = ticket;
+    }
+
+    public Log getLog() {
+        return log;
+    }
+
+    public void setLog(Log log) {
+        this.log = log;
     }
 }

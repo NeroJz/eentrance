@@ -22,7 +22,9 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import hk.com.uatech.eticket.eticket.Item;
 import hk.com.uatech.eticket.eticket.OfflineDatabase;
@@ -498,6 +500,9 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
 
                 ArrayList<SeatInfo> seatInfoArrayList = new ArrayList<SeatInfo>();
 
+                Map<String, List<String>> entries = new HashMap<String, List<String>>();
+                Map<String, List<String>> exits = new HashMap<String, List<String>>();
+
                 if(transactionInfo.getSeat().length > 0) {
                     for(GateSeatInfo gate_seat : transactionInfo.getSeat()) {
                         SeatInfo seat = new SeatInfo(
@@ -513,16 +518,56 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
                         seat.setConcession(transaction.isConcession());
 
                         seatInfoArrayList.add(seat);
+
+                        entries = addTimeEntries(
+                                gate_seat.getLog().getIn(),
+                                entries,
+                                gate_seat.getSeat_no());
+
+                        exits = addTimeEntries(
+                                gate_seat.getLog().getOut(),
+                                exits,
+                                gate_seat.getSeat_no());
+
                     }
                 }
 
                 SeatInfo[] seatInfo = seatInfoArrayList.toArray(new SeatInfo[seatInfoArrayList.size()]);
                 transaction.setSeatInfoList(seatInfo);
 
+                transaction.setLogIn(entries);
+                transaction.setLogOut(exits);
+
                 String json = gson.toJson(transaction);
                 goNext(json, transaction.getTrans_id(), refType, "");
 
                 break;
         }
+    }
+
+
+    private Map<String, List<String>> addTimeEntries(List<String> logs,
+                                                     Map<String, List<String>> data,
+                                                     String seatNo) {
+        if(logs.size() == 0) {
+            return  data;
+        }
+
+        for(String strDate : logs) {
+            if(data.containsKey(strDate)) {
+                List<String> tmp = data.get(strDate);
+                if(!tmp.contains(seatNo)) {
+                    tmp.add(seatNo);
+                    data.put(strDate, tmp);
+                }
+            } else {
+                List<String> tmp = new ArrayList<String>();
+                tmp.add(seatNo);
+                data.put(strDate, tmp);
+            }
+        }
+
+
+        return data;
     }
 }

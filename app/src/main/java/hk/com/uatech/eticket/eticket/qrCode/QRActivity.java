@@ -237,8 +237,6 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
 
                 String json = gson.toJson(transaction);
 
-                Log.d(QRActivity.class.toString(), json);
-
                 goNext(json, transaction.getTrans_id(), refType, "");
 
             } catch (Exception e) {

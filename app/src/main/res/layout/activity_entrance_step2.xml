@@ -492,7 +492,49 @@
                             </TableRow>
 
 
+                            <TextView
+                                android:id="@+id/tvClickEnter"
+                                android:clickable="true"
+                                android:paddingTop="5dp"
+                                android:text="Entries"
+                                android:textSize="14sp"
+                                android:textColor="#aaaaaa"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"/>
+
+                            <TableLayout
+                                android:id="@+id/tlEnterDetail"
+                                android:paddingLeft="10dp"
+                                android:paddingRight="10dp"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:shrinkColumns="*">
+                            </TableLayout>
+
+
+                            <TextView
+                                android:id="@+id/tvClickExit"
+                                android:clickable="true"
+                                android:paddingTop="5dp"
+                                android:text="Entries"
+                                android:textSize="14sp"
+                                android:textColor="#aaaaaa"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"/>
+
+                            <TableLayout
+                                android:id="@+id/tlExitDetail"
+                                android:paddingLeft="10dp"
+                                android:paddingRight="10dp"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:shrinkColumns="*">
+                            </TableLayout>
+
+
                         </TableLayout>
+
+
 
 
                         <LinearLayout

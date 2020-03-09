@@ -16,8 +16,10 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.text.InputType;
+import android.text.Layout;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +28,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -65,6 +68,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import hk.com.uatech.eticket.eticket.database.Entrance;
 import hk.com.uatech.eticket.eticket.network.NetworkRepository;
@@ -436,11 +440,11 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
         LinearLayout bgLayer = (LinearLayout) findViewById(R.id.bglayer);
         if ("offline".equals(accessMode)) {
             //tv.setVisibility(View.VISIBLE);
-            bgLayer.setBackgroundColor(Color.rgb(255, 179, 179));
+//            bgLayer.setBackgroundColor(Color.rgb(255, 179, 179));
 
         } else {
             //tv.setVisibility(View.GONE);
-            bgLayer.setBackgroundColor(Color.rgb(244, 244, 244));
+//            bgLayer.setBackgroundColor(Color.rgb(244, 244, 244));
 
         }
 
@@ -464,6 +468,55 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
             Gson gson = new Gson();
             ticketTrans = gson.fromJson(jsonSource, TicketTrans.class);
         }
+
+        TableLayout tlEnter = (TableLayout) findViewById(R.id.tlEnterDetail);
+
+
+        if(ticketTrans != null && ticketTrans.getLogIn().size() > 0) {
+            for(String strDate: ticketTrans.getLogIn().keySet()) {
+
+
+                TableRow tableRow = new TableRow(this);
+                LayoutParams tableRowParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+                tableRow.setLayoutParams(tableRowParams);
+
+
+                LayoutParams tvLayoutParam = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+
+                TextView dateTv = new TextView(this);
+                dateTv.append(strDate);
+                dateTv.setTextSize(14);
+                dateTv.setEms(10);
+                dateTv.setTextColor(Color.parseColor("#aaaaaa"));
+
+                TextView seatsTv = new TextView(this);
+                seatsTv.setInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+                seatsTv.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_END);
+                seatsTv.setTextSize(14);
+                seatsTv.setEms(10);
+                seatsTv.setTextColor(Color.parseColor("#aaaaaa"));
+                seatsTv.setPadding(0, 0, 10, 0);
+
+                List<String> seatNo = ticketTrans.getLogIn().get(strDate);
+
+                String seat = "";
+                for(String s : seatNo) {
+                    seat += s + " ";
+                }
+
+                seat = seat.trim();
+                seat = seat.replace(" ", ",");
+
+                seatsTv.append(seat);
+
+                tableRow.addView(dateTv);
+                tableRow.addView(seatsTv);
+
+                tlEnter.addView(tableRow);
+            }
+
+        }
+
 
 
         String movieTitle = "";
@@ -1321,7 +1374,7 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
         if (isValid) {
             playSuccess();
             imgInvalid.setVisibility(View.GONE);
-            cardBack.setBackgroundColor(getResources().getColor(R.color.valid));
+//            cardBack.setBackgroundColor(getResources().getColor(R.color.valid));
         } else {
             playBuzzer();
             if (getIntent().getBooleanExtra("showScanner", false)) {
@@ -1329,7 +1382,7 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
                 scanStatus.setText("Invalid ticket");
             }
             imgValid.setVisibility(View.GONE);
-            cardBack.setBackgroundColor(getResources().getColor(R.color.invalid));
+//            cardBack.setBackgroundColor(getResources().getColor(R.color.invalid));
         }
     }
 

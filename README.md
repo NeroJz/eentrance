@@ -7,9 +7,9 @@ This application requires minimum Java 8+ or Android API 21+.
 
 
 ## Libraries
-**[GSON][https://github.com/google/gson]** is Java library that can be used to convert Java Object into JSON representation.
-**[Retrofit](https://github.com/square/retrofit)** is a type-safe HTTP client for Android and Java.  It uses for RESTful API calling.
-**[Zing](https://github.com/pethoalpar/ZxingExample)** is a library for reading a barcode.
+**[GSON](https://github.com/google/gson)** is Java library that can be used to convert Java Object into JSON representation. <br/>
+**[Retrofit](https://github.com/square/retrofit)** is a type-safe HTTP client for Android and Java.  It uses for RESTful API calling.<br/>
+**[Zing](https://github.com/pethoalpar/ZxingExample)** is a library for reading a barcode.<br/>
 **[Scalars Converter](https://github.com/square/retrofit/tree/master/retrofit-converters/scalars)** supports converting strings and both primitives and their boxed types to text/plain bodies.
 
 

@@ -45,19 +45,6 @@ import hk.com.uatech.eticket.eticket.preferences.PreferencesController;
 
 public abstract class QRActivity extends AppCompatActivity implements NetworkRepository.QueryCallback {
 
-//    final private static int ACTION_INDEX = 0;
-//    final private static int TRANS_ID_INDEX = 1;
-//    final private static int CINEMA_ID_INDEX = 2;
-//    final private static int HOUSE_ID_INDEX = 3;
-//    final private static int SHOW_ID_INDEX = 4;
-//    final private static int SHOW_DATE_INDEX = 5;
-//    final private static int MOVIE_ID_INDEX = 6;
-//    final private static int MOVIE_CTG_INDEX = 7;
-//    final private static int SEAT_NO_INDEX = 8;
-//    final private static int TICKET_TYPE_INDEX = 9;
-//    final private static int CONCESSION_TYPE_INDEX = 10;
-
-
     final private static int OPERATION_BIT_INDEX = 0;
     final private static int TRANS_ID_INDEX = 1;
     final private static int CINEMA_ID_INDEX = 2;
@@ -72,10 +59,6 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
     final private static int FULL_SEAT_INDEX = 11;
     final private static int TICKET_TYPE_INDEX = 12;
     final private static int CONCESSION_BIT_INDEX = 13;
-
-
-    final private static int REMAIN_TICKET = 1;
-    final private static int TOTAL_TICKET = 4;
 
     public ProgressDialog loading = null;
 

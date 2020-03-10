@@ -1109,265 +1109,6 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
-    private static NtlmPasswordAuthentication createAuth(String aUser, String aPasswd) {
-        StringBuffer sb = new StringBuffer(aUser);
-        sb.append(':').append(aPasswd);
-
-        return new NtlmPasswordAuthentication(sb.toString());
-    }
-
-    public static SmbFile createSmbFile(String aUser, String aPasswd, String aTarget) throws IOException {
-        NtlmPasswordAuthentication auth = createAuth(aUser, aPasswd);
-        return new SmbFile(aTarget, auth);
-    }
-
-    private static Timestamp getCurrentTimeStamp() {
-        Date today = new Date();
-        return new Timestamp(today.getTime());
-    }
-
-    private String mssqlLogUpdate(String aContent0, String aContent) {
-
-        String server = PreferencesController.getInstance().getNetwork();
-        String mssqlUserName = PreferencesController.getInstance().getNetworkUser();//sp.getString("network_user", "");  // alex
-        String mssqlPassword = PreferencesController.getInstance().getNetworkPassword();//sp.getString("network_password", ""); // csl100323
-
-
-        String debug = "";
-
-        Connection con = null;
-
-        String ret = "";
-
-
-        try {
-
-
-            Class.forName("net.sourceforge.jtds.jdbc.Driver");
-            //Class.forName("com.mysql.jdbc.Driver");
-            //Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-
-            con = DriverManager.getConnection("jdbc:jtds:sqlserver://" + server + ":1433/db_tvdisplay;", mssqlUserName, mssqlPassword);
-//;instance=SQLEXPRESS
-
-            if (con != null && !con.isClosed()) {
-                //con = DriverManager.getConnection("jdbc:sqlserver://" + server + ":1433; databaseName=db_tvdisplay; ", mssqlUserName, mssqlPassword);
-                // instance=SQLEXPRESS
-                //con = DriverManager.getConnection( "jdbc:mysql://mysql.station188.com:3306/conquerstars_association", mysqlUserName, mysqlPassword );
-
-                //Statement stmt = con.createStatement();//创建Statement
-                PreparedStatement statement = con.prepareStatement("INSERT INTO tb_tvdisplay (tvdrefno, tvdorder, tvdtype, tvddt, tvdstatus) VALUES (?,?,?,getdate(), ?)");
-                statement.setString(1, aContent0);
-                statement.setString(2, aContent);
-                statement.setString(3, "V");
-                //statement.setDate(4, new java.sql.Date(System.currentTimeMillis()));
-                //statement.setTimestamp(4, getCurrentTimeStamp());
-                statement.setString(4, "S");
-
-                statement.execute();
-                con.close();
-
-            /*Context context = getApplicationContext();
-            CharSequence text = "Connection OK"; //"Login Fail, please try again";
-            int duration = Toast.LENGTH_SHORT;
-
-            Toast toast = Toast.makeText(context, text, duration);
-            toast.show();
-            */
-            } else {
-
-                ret = "ERROR: connection is closed";
-                //ret = "jdbc:jtds:sqlserver://" + server + ":1433/db_tvdisplay; (" + mssqlUserName + ")(" + mssqlPassword + ")";
-
-            }
-        } catch (ClassNotFoundException ce) {
-            System.out.println("Class Not Found!!");
-            ret = "Error - CNF: (" + debug + "):  Class Not Found!!";
-        } catch (SQLException se) {
-            //System.out.println(se.getMessage() );
-            ret = "Error - SE: (" + debug + "): " + se.getMessage();
-        } catch (Exception connEx) {
-
-            /*
-            Context context = getApplicationContext();
-            CharSequence text = connEx.getMessage(); //"Login Fail, please try again";
-            int duration = Toast.LENGTH_SHORT;
-
-            Toast toast = Toast.makeText(context, text, duration);
-            toast.show();
-            */
-            ret = "Error - EX: (" + debug + "): " + connEx.getMessage();
-        }
-
-        return ret;
-    }
-
-
-    private void finalizeObject() {
-        if (mPrinter == null) {
-            return;
-        }
-
-        mPrinter.clearCommandBuffer();
-
-
-        mPrinter.setReceiveEventListener(null);
-
-        try {
-            mPrinter.disconnect();
-        } catch (Exception ex) {
-            // Do nothing
-        }
-
-        mPrinter = null;
-    }
-
-
-    private boolean isPrintable(PrinterStatusInfo status) {
-        if (status == null) {
-            return false;
-        }
-
-        if (status.getConnection() == Printer.FALSE) {
-            return false;
-        } else if (status.getOnline() == Printer.FALSE) {
-            return false;
-        } else {
-            ;//print available
-        }
-
-        return true;
-    }
-
-    private String consolidateDebugMsg = "";
-
-    private boolean runPrintDepartmentReceipt(String token, String foodRefId, String ipaddress, String department, List<String> items, List<String> qtys, List<String> remarks, List<String> departNames, List<String> seats) {
-
-        if (isLocalDebug && isLocalSkipPrint) {
-            return true;
-        }
-
-        if (isLocalDebug) {
-            ipaddress = "192.168.1.36";
-        }
-
-        // For which printer we need to use
-        int index = -1;
-        for (int ll = 0; ll < mPrinterIPList.size(); ll++) {
-            if (ipaddress.compareTo(mPrinterIPList.get(ll)) == 0) {
-                index = ll + 1;
-                break;
-            }
-        }
-
-        if (index == -1) {
-            return false;
-        }
-
-        if (department.toLowerCase().contains("consolidation")) {
-            consolidateDebugMsg += String.valueOf(index);
-        }
-
-
-        if (index - 1 > mPrinters.size() - 1 && index - 1 < 0) {
-            return false;
-        }
-        Printer printer = mPrinters.get(index - 1);
-
-        if (printer == null) {
-            return false;
-        } else {
-            mPrinter = printer;
-        }
-
-        System.out.println("runPrintReceiptSequence - 2");
-
-        if (department.toLowerCase().contains("consolidation")) {
-            consolidateDebugMsg += "[PC]";
-        }
-
-        if (!createDepartmentData(token, foodRefId, department, items, qtys, remarks, departNames, seats)) {
-            //finalizeObject();
-
-            PrinterUtils.finalizeObject(printer);
-            return false;
-        }
-
-        if (department.toLowerCase().contains("consolidation")) {
-            consolidateDebugMsg += "[PC3]";
-        }
-
-        System.out.println("runPrintReceiptSequence - 3");
-
-        if (!printData(index, ipaddress)) {
-            finalizeObject();
-
-
-            return false;
-        }
-        return true;
-    }
-
-
-    private boolean printData(int index, String ipaddress) {
-        /*
-        if (mPrinter == null) {
-            return false;
-        }
-        */
-
-        if (index - 1 > mPrinters.size() - 1 && index - 1 < 0) {
-            return false;
-        }
-        Printer printer = mPrinters.get(index - 1);
-        if (printer == null) {
-            return false;
-        }
-        if (!PrinterUtils.beginTran(printer)) {
-            System.out.println("Return - " + index);
-            return false;
-        }
-
-
-        //PrinterStatusInfo status = mPrinter.getStatus();
-        PrinterStatusInfo status = null;
-        status = printer.getStatus();
-
-        if (status == null) {
-            System.out.println("Status == null in PrintData");
-            return false;
-        }
-        //dispPrinterWarnings(status);
-
-        if (!isPrintable(status)) {
-            //ShowMsg.showMsg(makeErrorMessage(status), mContext);
-            try {
-                //mPrinter.disconnect();
-                printer.disconnect();
-
-            } catch (Exception ex) {
-                // Do nothing
-            }
-            return false;
-        }
-
-        try {
-            printer.sendData(Printer.PARAM_DEFAULT);
-
-        } catch (Epos2Exception e) {
-            //ShowMsg.showException(e, "sendData", mContext);
-            try {
-                printer.disconnect();
-            } catch (Exception ex) {
-                // Do nothing
-            }
-            return false;
-        }
-        PrinterUtils.endTran(this, printer);
-
-        return true;
-    }
-
     private void changeMode(boolean isValid) {
         if (isValid) {
             playSuccess();
@@ -1382,623 +1123,6 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
             imgValid.setVisibility(View.GONE);
 //            cardBack.setBackgroundColor(getResources().getColor(R.color.invalid));
         }
-    }
-
-    private boolean createDepartmentData(String token, String foodRefId, String department, List<String> items, List<String> qtys, List<String> remarks, List<String> departmentNames, List<String> seats) {
-        String method = "";
-        //Bitmap logoData = BitmapFactory.decodeResource(getResources(), R.drawable.store);
-        StringBuilder textData = new StringBuilder();
-        final int barcodeWidth = 3;
-        final int barcodeHeight = 7;
-
-        /*
-        if (mPrinter == null) {
-            return false;
-        }
-        */
-
-        if (department.toLowerCase().contains("consolidation")) {
-            consolidateDebugMsg += "P1";
-        }
-
-        try {
-            method = "addTextAlign";
-            mPrinter.addTextAlign(Printer.ALIGN_CENTER);
-
-            /*
-            method = "addImage";
-            mPrinter.addImage(logoData, 0, 0,
-                    logoData.getWidth(),
-                    logoData.getHeight(),
-                    Printer.COLOR_1,
-                    Printer.MODE_MONO,
-                    Printer.HALFTONE_DITHER,
-                    Printer.PARAM_DEFAULT,
-                    Printer.COMPRESS_AUTO);
-*/
-
-
-            method = "addTextStyle";
-            mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.FALSE, Printer.TRUE, Printer.PARAM_DEFAULT);
-
-            method = "addTextSize";
-            mPrinter.addTextSize(2, 2);
-
-            method = "addText";
-            //mPrinter.addText(token + "\n"); /* foodRefNo */
-            mPrinter.addText(foodRefId + "\n"); /* foodRefNo */
-
-            method = "addTextSize";
-            mPrinter.addTextSize(1, 1);
-
-
-            method = "addTextStyle";
-            mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.FALSE, Printer.FALSE, Printer.PARAM_DEFAULT);
-
-            method = "addTextAlign";
-            mPrinter.addTextAlign(Printer.ALIGN_LEFT);
-
-
-            method = "addText";
-            mPrinter.addText("_______________________________________________");
-
-            method = "addTextAlign";
-            mPrinter.addTextAlign(Printer.ALIGN_CENTER);
-
-
-            method = "addFeedLine";
-            mPrinter.addFeedLine(2);
-
-
-            if (department.toLowerCase().indexOf("consolidation") >= 0) {
-                String displaySeats = "";
-
-                // By Consolidation Table
-                int noOfComma = 0;
-                if (items.size() > 0) {
-                    for (int l = 0; l < items.size(); l++) {
-
-                        int chkInside = seats.get(l).toLowerCase().indexOf(displaySeats.toLowerCase());
-
-                        if ("".compareTo(displaySeats) == 0) {
-
-
-                            chkInside = -1;
-                        }
-
-                        if (chkInside >= 0) {
-                            // Found
-
-                        } else {
-                            if ("".compareTo(displaySeats) != 0) {
-
-                                if (noOfComma % 4 != 0) {
-                                    displaySeats += ",";
-                                }
-
-                            }
-                            displaySeats += seats.get(l);
-                            displaySeats += seats.get(l).toString();
-
-                            noOfComma++;
-
-                            if (noOfComma % 4 == 0) {
-                                displaySeats += "\n";
-                            }
-
-
-                        }
-                    }
-                }
-
-                /*
-                textData.append("        VIP             |             " + displaySeats + "          ");
-                method = "addText";
-                mPrinter.addText(textData.toString());
-                //System.out.print(textData.toString());
-                textData.delete(0, textData.length());
-                 */
-
-                textData.append("        VIP             |                       \n");
-                method = "addText";
-                mPrinter.addText(textData.toString());
-                //System.out.print(textData.toString());
-                textData.delete(0, textData.length());
-
-
-                method = "addTextStyle";
-                mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.FALSE, Printer.TRUE, Printer.PARAM_DEFAULT);
-
-                method = "addTextAlign";
-                mPrinter.addTextAlign(Printer.ALIGN_RIGHT);
-
-
-                method = "addText";
-                textData.append("" + displaySeats + "");
-                mPrinter.addText(textData.toString());
-                textData.delete(0, textData.length());
-
-
-                // Restore original Style
-                method = "addTextStyle";
-                mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.FALSE, Printer.FALSE, Printer.PARAM_DEFAULT);
-
-                method = "addTextAlign";
-                mPrinter.addTextAlign(Printer.ALIGN_LEFT);
-
-                //mPrinter.addTextAlign(Printer.ALIGN_CENTER);
-
-
-            } else {
-                String displaySeats = "";
-                int noOfComma = 0;
-                // Department
-                if (seats.size() > 0) {
-                    for (int l = 0; l < seats.size(); l++) {
-                        String tmpDepartName = departmentNames.get(l);
-                        if (tmpDepartName.compareTo(department) == 0) {
-
-                            int chkInside = seats.get(l).toLowerCase().indexOf(displaySeats.toLowerCase());
-
-                            if ("".compareTo(displaySeats) == 0) {
-                                chkInside = -1;
-                            }
-
-                            if (chkInside >= 0) {
-                                // Found
-
-                            } else {
-                                if ("".compareTo(displaySeats) != 0) {
-                                    if (noOfComma % 4 != 0) {
-                                        displaySeats += ",";
-                                    }
-                                }
-                                displaySeats += seats.get(l).toString();
-
-                                noOfComma++;
-
-                                if (noOfComma % 4 == 0) {
-                                    displaySeats += "\n";
-                                }
-                            }
-
-
-                        }
-                    }
-
-
-                }
-
-                //textData.append(displaySeats + "\n");
-                /*
-                textData.append("        VIP             |             " + displaySeats + "          ");
-                method = "addText";
-                mPrinter.addText(textData.toString());
-                //System.out.print("        VIP             |             " + displaySeats + "          ");
-                textData.delete(0, textData.length());
-                */
-
-
-                textData.append("        VIP             |                       \n");
-                method = "addText";
-                mPrinter.addText(textData.toString());
-                //System.out.print(textData.toString());
-                textData.delete(0, textData.length());
-
-
-                method = "addTextStyle";
-                mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.FALSE, Printer.TRUE, Printer.PARAM_DEFAULT);
-
-                method = "addTextAlign";
-                mPrinter.addTextAlign(Printer.ALIGN_RIGHT);
-
-
-                method = "addText";
-                textData.append("" + displaySeats + "");
-                mPrinter.addText(textData.toString());
-                textData.delete(0, textData.length());
-
-
-                // Restore original Style
-                method = "addTextStyle";
-                mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.FALSE, Printer.FALSE, Printer.PARAM_DEFAULT);
-
-
-                method = "addTextAlign";
-                mPrinter.addTextAlign(Printer.ALIGN_LEFT);
-
-            }
-
-
-            method = "addFeedLine";
-            mPrinter.addFeedLine(2);
-
-            if (department.toLowerCase().contains("consolidation")) {
-                consolidateDebugMsg += "P2";
-            }
-
-            // method = "addText";
-            // mPrinter.addText(textData.toString());
-            // textData.delete(0, textData.length());
-
-
-            //if ("Consolidate".compareTo(department) == 0) {
-            if (department.toLowerCase().contains("consolidation")) {
-
-                method = "addText";
-                mPrinter.addText("_______________________________________________\n\n");
-
-                method = "addSymbol";
-                mPrinter.addSymbol(token, Printer.SYMBOL_PDF417_STANDARD, Printer.LEVEL_0, barcodeWidth, barcodeHeight, 0);
-
-                /* foodRefNo */
-/*
-            method = "addText";
-            mPrinter.addText("\n\n");
-
-            method="addHLine";
-            mPrinter.addHLine(0, 100, Printer.LINE_THIN);
-*/
-
-                method = "addTextAlign";
-                mPrinter.addTextAlign(Printer.ALIGN_LEFT);
-
-
-            }
-
-            method = "addText";
-            mPrinter.addText("_______________________________________________\n");
-
-
-            method = "addTextStyle";
-            mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.TRUE, Printer.TRUE, Printer.PARAM_DEFAULT);
-            mPrinter.addTextAlign(Printer.ALIGN_LEFT);
-
-            method = "addTextAlign";
-            mPrinter.addTextAlign(Printer.ALIGN_LEFT);
-
-            method = "addFeedLine";
-            mPrinter.addFeedLine(1);
-            textData.append("Department\n");
-
-
-            method = "addTextStyle";
-            mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.TRUE, Printer.TRUE, Printer.PARAM_DEFAULT);
-            method = "addText";
-            mPrinter.addText(textData.toString());
-            textData.delete(0, textData.length());
-
-            // Restore the Text Style
-            method = "addTextStyle";
-            mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.FALSE, Printer.FALSE, Printer.PARAM_DEFAULT);
-
-
-            method = "addTextAlign";
-            mPrinter.addTextAlign(Printer.ALIGN_LEFT);
-
-            textData.append(department + "\n\n\n");
-            method = "addText";
-            mPrinter.addText(textData.toString());
-            textData.delete(0, textData.length());
-
-
-            if (department.toLowerCase().indexOf("consolidation") >= 0) {
-                if (items.size() > 0) {
-                    for (int l = 0; l < items.size(); l++) {
-
-                        method = "addTextStyle";
-                        mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.TRUE, Printer.TRUE, Printer.PARAM_DEFAULT);
-
-                        method = "addTextAlign";
-                        mPrinter.addTextAlign(Printer.ALIGN_LEFT);
-
-                        textData.append(seats.get(l).toString() + "\n");
-
-                        method = "addText";
-                        mPrinter.addText(textData.toString());
-                        //System.out.print(textData.toString());
-                        textData.delete(0, textData.length());
-
-                        method = "addTextStyle";
-                        mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.FALSE, Printer.FALSE, Printer.PARAM_DEFAULT);
-
-                        method = "addTextAlign";
-                        mPrinter.addTextAlign(Printer.ALIGN_LEFT);
-
-                        textData.append(items.get(l).toString() + "\n");
-                        method = "addText";
-                        mPrinter.addText(textData.toString());
-                        //System.out.print(textData.toString());
-                        textData.delete(0, textData.length());
-
-
-                        if ("".compareTo(remarks.get(l).toString()) != 0) {
-
-                            String tmpCheck = remarks.get(l).toString();
-
-                            if (tmpCheck.trim().compareTo("") != 0) {
-                                textData.append(remarks.get(l).toString() + "\n\n");
-
-                                method = "addText";
-                                mPrinter.addText(textData.toString());
-                                //System.out.print(textData.toString());
-                                textData.delete(0, textData.length());
-                            }
-                        }
-                    }
-                }
-            } else {
-
-                // Item
-                method = "addTextStyle";
-                mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.TRUE, Printer.TRUE, Printer.PARAM_DEFAULT);
-
-                textData.append("Item Detail\n");
-                method = "addText";
-                mPrinter.addText(textData.toString());
-                //System.out.print(textData.toString());
-                textData.delete(0, textData.length());
-
-                method = "addTextStyle";
-                mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.FALSE, Printer.FALSE, Printer.PARAM_DEFAULT);
-
-
-                if (items.size() > 0) {
-                    ArrayList items1 = new ArrayList();
-                    ArrayList remarks1 = new ArrayList();
-                    ArrayList qty1 = new ArrayList();
-
-                    for (int l = 0; l < items.size(); l++) {
-                        String tmpDepartName = departmentNames.get(l).toString();
-                        if (tmpDepartName.compareTo(department) == 0) {
-                            // Same Department, Check same item or not
-                            boolean foundItems = false;
-                            for (int y = 0; y < items1.size(); y++) {
-                                if (items1.get(y).toString().compareTo(items.get(l).toString()) == 0) {
-                                    foundItems = true;
-
-                                    // Add the quantity
-                                    int orgQty = Integer.parseInt(qty1.get(y).toString());
-                                    orgQty += Integer.parseInt(qtys.get(l).toString());
-                                    qty1.set(y, String.valueOf(orgQty));
-
-                                    String tmpRemark = "";
-                                    if ("".compareTo(remarks.get(l).toString().trim()) == 0) {
-                                        tmpRemark = remarks1.get(y).toString();
-                                    } else {
-                                        tmpRemark = remarks1.get(y).toString() + "\n" + remarks.get(l).toString();
-                                    }
-
-                                    remarks1.set(y, tmpRemark);
-                                    break;
-                                }
-                            }
-
-                            if (!foundItems) {
-
-                                items1.add(items.get(l).toString());
-                                qty1.add(qtys.get(l).toString());
-                                remarks1.add(remarks.get(l).toString().trim());
-
-                            }
-
-
-                        }
-                    }
-
-                    for (int k = 0; k < items1.size(); k++) {
-                        String value = items1.get(k) + " X " + qty1.get(k).toString();
-                        textData.append(value + "\n");
-                        method = "addText";
-                        mPrinter.addText(textData.toString());
-                        //System.out.print(textData.toString());
-                        textData.delete(0, textData.length());
-
-                        if ("".compareTo(remarks1.get(k).toString()) != 0) {
-                            textData.append(remarks1.get(k) + "\n\n");
-                            method = "addText";
-                            mPrinter.addText(textData.toString());
-                            //System.out.print(textData.toString());
-                            textData.delete(0, textData.length());
-                        }
-                    }
-                }
-            }
-
-            if (department.toLowerCase().indexOf("consolidation") >= 0) {
-                consolidateDebugMsg += "P3";
-            }
-
-            textData.append("\n\n\n");
-            method = "addText";
-            mPrinter.addText(textData.toString());
-            textData.delete(0, textData.length());
-
-
-            // Print Date
-            method = "addTextStyle";
-            mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.TRUE, Printer.TRUE, Printer.PARAM_DEFAULT);
-
-
-            textData.append("Print Date\n");
-            method = "addText";
-            mPrinter.addText(textData.toString());
-            textData.delete(0, textData.length());
-
-
-            method = "addTextStyle";
-            mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.FALSE, Printer.FALSE, Printer.PARAM_DEFAULT);
-
-
-            Date currentDt = new Date();
-            SimpleDateFormat displayFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.US);
-            String displayFileDateTime = displayFormat.format(currentDt);
-            textData.append(displayFileDateTime + "\n\n");
-            mPrinter.addText(textData.toString());
-            textData.delete(0, textData.length());
-
-
-            // F&B Order ID
-            method = "addTextStyle";
-
-            mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.TRUE, Printer.TRUE, Printer.PARAM_DEFAULT);
-            mPrinter.addTextAlign(Printer.ALIGN_RIGHT);
-
-            textData.append("F&B Order Id\n");
-            method = "addText";
-            mPrinter.addText(textData.toString());
-            textData.delete(0, textData.length());
-
-
-            method = "addTextStyle";
-            mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.FALSE, Printer.FALSE, Printer.PARAM_DEFAULT);
-
-
-            textData.append(token + "\n\n");
-
-
-            method = "addText";
-            mPrinter.addText(textData.toString());
-            textData.delete(0, textData.length());
-
-
-            method = "addCut";
-            mPrinter.addCut(Printer.CUT_FEED);
-
-            if (department.toLowerCase().indexOf("consolidation") >= 0) {
-                consolidateDebugMsg += "P4";
-            }
-        } catch (Exception e) {
-            // ShowMsg.showException(e, method, mContext);
-            String tmp = e.getMessage();
-            return false;
-        }
-
-        textData = null;
-
-
-        return true;
-    }
-
-
-    private boolean createReceiptData() {
-        String method = "";
-        //Bitmap logoData = BitmapFactory.decodeResource(getResources(), R.drawable.store);
-        StringBuilder textData = new StringBuilder();
-        final int barcodeWidth = 2;
-        final int barcodeHeight = 100;
-
-        if (mPrinter == null) {
-            return false;
-        }
-
-        try {
-            method = "addTextAlign";
-            mPrinter.addTextAlign(Printer.ALIGN_CENTER);
-
-            /*
-            method = "addImage";
-            mPrinter.addImage(logoData, 0, 0,
-                    logoData.getWidth(),
-                    logoData.getHeight(),
-                    Printer.COLOR_1,
-                    Printer.MODE_MONO,
-                    Printer.HALFTONE_DITHER,
-                    Printer.PARAM_DEFAULT,
-                    Printer.COMPRESS_AUTO);
-*/
-            mPrinter.addText(movieTransId);
-            mPrinter.addHLine(0, 100, 0);
-
-
-            method = "addBarcode";
-            mPrinter.addBarcode("01209457",
-
-                    Printer.BARCODE_CODE39,
-                    Printer.HRI_BELOW,
-                    Printer.FONT_A,
-                    barcodeWidth,
-                    barcodeHeight);
-
-
-            method = "addFeedLine";
-            mPrinter.addFeedLine(1);
-            textData.append("THE STORE 123 (555) 555 – 5555\n");
-            textData.append("STORE DIRECTOR – John Smith\n");
-            textData.append("\n");
-            textData.append("7/01/07 16:58 6153 05 0191 134\n");
-            textData.append("ST# 21 OP# 001 TE# 01 TR# 747\n");
-            textData.append("------------------------------\n");
-            method = "addText";
-            mPrinter.addText(textData.toString());
-            textData.delete(0, textData.length());
-
-            textData.append("400 OHEIDA 3PK SPRINGF  9.99 R\n");
-            textData.append("410 3 CUP BLK TEAPOT    9.99 R\n");
-            textData.append("445 EMERIL GRIDDLE/PAN 17.99 R\n");
-            textData.append("438 CANDYMAKER ASSORT   4.99 R\n");
-            textData.append("474 TRIPOD              8.99 R\n");
-            textData.append("433 BLK LOGO PRNTED ZO  7.99 R\n");
-            textData.append("458 AQUA MICROTERRY SC  6.99 R\n");
-            textData.append("493 30L BLK FF DRESS   16.99 R\n");
-            textData.append("407 LEVITATING DESKTOP  7.99 R\n");
-            textData.append("441 **Blue Overprint P  2.99 R\n");
-            textData.append("476 REPOSE 4PCPM CHOC   5.49 R\n");
-            textData.append("461 WESTGATE BLACK 25  59.99 R\n");
-            textData.append("------------------------------\n");
-            method = "addText";
-            mPrinter.addText(textData.toString());
-            textData.delete(0, textData.length());
-
-            textData.append("SUBTOTAL                160.38\n");
-            textData.append("TAX                      14.43\n");
-            method = "addText";
-            mPrinter.addText(textData.toString());
-            textData.delete(0, textData.length());
-
-            method = "addTextSize";
-            mPrinter.addTextSize(2, 2);
-            method = "addText";
-            mPrinter.addText("TOTAL    174.81\n");
-            method = "addTextSize";
-            mPrinter.addTextSize(1, 1);
-            method = "addFeedLine";
-            mPrinter.addFeedLine(1);
-
-            textData.append("CASH                    200.00\n");
-            textData.append("CHANGE                   25.19\n");
-            textData.append("------------------------------\n");
-            method = "addText";
-            mPrinter.addText(textData.toString());
-            textData.delete(0, textData.length());
-
-            textData.append("Purchased item total number\n");
-            textData.append("Sign Up and Save !\n");
-            textData.append("With Preferred Saving Card\n");
-            method = "addText";
-            mPrinter.addText(textData.toString());
-            textData.delete(0, textData.length());
-            method = "addFeedLine";
-            mPrinter.addFeedLine(2);
-
-            method = "addBarcode";
-            mPrinter.addBarcode("01209457",
-                    Printer.BARCODE_CODE39,
-                    Printer.HRI_BELOW,
-                    Printer.FONT_A,
-                    barcodeWidth,
-                    barcodeHeight);
-
-            method = "addCut";
-            mPrinter.addCut(Printer.CUT_FEED);
-        } catch (Exception e) {
-            // ShowMsg.showException(e, method, mContext);
-            return false;
-        }
-
-        textData = null;
-
-        return true;
     }
 
 
@@ -4017,6 +3141,11 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
     }
 
 
+    /**
+     * Create text view for Date
+     * @param strDate
+     * @return
+     */
     private TextView createDateTextView(String strDate) {
         TextView dateTv = new TextView(this);
         dateTv.append(strDate);
@@ -4027,7 +3156,12 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
         return dateTv;
     }
 
-
+    /**
+     * Create text view for Seats
+     * @param strDate
+     * @param seatNo
+     * @return
+     */
     private TextView createSeatTextView(String strDate, List<String> seatNo) {
         TextView seatsTv = new TextView(this);
         seatsTv.setInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE);
@@ -4049,5 +3183,889 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
 
         return seatsTv;
     }
+
+
+    /**
+     * Original Code
+     * The following contains the functions that are not using in Boardway
+     */
+
+    private boolean createDepartmentData(String token, String foodRefId, String department, List<String> items, List<String> qtys, List<String> remarks, List<String> departmentNames, List<String> seats) {
+        String method = "";
+        //Bitmap logoData = BitmapFactory.decodeResource(getResources(), R.drawable.store);
+        StringBuilder textData = new StringBuilder();
+        final int barcodeWidth = 3;
+        final int barcodeHeight = 7;
+
+        /*
+        if (mPrinter == null) {
+            return false;
+        }
+        */
+
+        if (department.toLowerCase().contains("consolidation")) {
+            consolidateDebugMsg += "P1";
+        }
+
+        try {
+            method = "addTextAlign";
+            mPrinter.addTextAlign(Printer.ALIGN_CENTER);
+
+            /*
+            method = "addImage";
+            mPrinter.addImage(logoData, 0, 0,
+                    logoData.getWidth(),
+                    logoData.getHeight(),
+                    Printer.COLOR_1,
+                    Printer.MODE_MONO,
+                    Printer.HALFTONE_DITHER,
+                    Printer.PARAM_DEFAULT,
+                    Printer.COMPRESS_AUTO);
+*/
+
+
+            method = "addTextStyle";
+            mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.FALSE, Printer.TRUE, Printer.PARAM_DEFAULT);
+
+            method = "addTextSize";
+            mPrinter.addTextSize(2, 2);
+
+            method = "addText";
+            //mPrinter.addText(token + "\n"); /* foodRefNo */
+            mPrinter.addText(foodRefId + "\n"); /* foodRefNo */
+
+            method = "addTextSize";
+            mPrinter.addTextSize(1, 1);
+
+
+            method = "addTextStyle";
+            mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.FALSE, Printer.FALSE, Printer.PARAM_DEFAULT);
+
+            method = "addTextAlign";
+            mPrinter.addTextAlign(Printer.ALIGN_LEFT);
+
+
+            method = "addText";
+            mPrinter.addText("_______________________________________________");
+
+            method = "addTextAlign";
+            mPrinter.addTextAlign(Printer.ALIGN_CENTER);
+
+
+            method = "addFeedLine";
+            mPrinter.addFeedLine(2);
+
+
+            if (department.toLowerCase().indexOf("consolidation") >= 0) {
+                String displaySeats = "";
+
+                // By Consolidation Table
+                int noOfComma = 0;
+                if (items.size() > 0) {
+                    for (int l = 0; l < items.size(); l++) {
+
+                        int chkInside = seats.get(l).toLowerCase().indexOf(displaySeats.toLowerCase());
+
+                        if ("".compareTo(displaySeats) == 0) {
+
+
+                            chkInside = -1;
+                        }
+
+                        if (chkInside >= 0) {
+                            // Found
+
+                        } else {
+                            if ("".compareTo(displaySeats) != 0) {
+
+                                if (noOfComma % 4 != 0) {
+                                    displaySeats += ",";
+                                }
+
+                            }
+                            displaySeats += seats.get(l);
+                            displaySeats += seats.get(l).toString();
+
+                            noOfComma++;
+
+                            if (noOfComma % 4 == 0) {
+                                displaySeats += "\n";
+                            }
+
+
+                        }
+                    }
+                }
+
+                /*
+                textData.append("        VIP             |             " + displaySeats + "          ");
+                method = "addText";
+                mPrinter.addText(textData.toString());
+                //System.out.print(textData.toString());
+                textData.delete(0, textData.length());
+                 */
+
+                textData.append("        VIP             |                       \n");
+                method = "addText";
+                mPrinter.addText(textData.toString());
+                //System.out.print(textData.toString());
+                textData.delete(0, textData.length());
+
+
+                method = "addTextStyle";
+                mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.FALSE, Printer.TRUE, Printer.PARAM_DEFAULT);
+
+                method = "addTextAlign";
+                mPrinter.addTextAlign(Printer.ALIGN_RIGHT);
+
+
+                method = "addText";
+                textData.append("" + displaySeats + "");
+                mPrinter.addText(textData.toString());
+                textData.delete(0, textData.length());
+
+
+                // Restore original Style
+                method = "addTextStyle";
+                mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.FALSE, Printer.FALSE, Printer.PARAM_DEFAULT);
+
+                method = "addTextAlign";
+                mPrinter.addTextAlign(Printer.ALIGN_LEFT);
+
+                //mPrinter.addTextAlign(Printer.ALIGN_CENTER);
+
+
+            } else {
+                String displaySeats = "";
+                int noOfComma = 0;
+                // Department
+                if (seats.size() > 0) {
+                    for (int l = 0; l < seats.size(); l++) {
+                        String tmpDepartName = departmentNames.get(l);
+                        if (tmpDepartName.compareTo(department) == 0) {
+
+                            int chkInside = seats.get(l).toLowerCase().indexOf(displaySeats.toLowerCase());
+
+                            if ("".compareTo(displaySeats) == 0) {
+                                chkInside = -1;
+                            }
+
+                            if (chkInside >= 0) {
+                                // Found
+
+                            } else {
+                                if ("".compareTo(displaySeats) != 0) {
+                                    if (noOfComma % 4 != 0) {
+                                        displaySeats += ",";
+                                    }
+                                }
+                                displaySeats += seats.get(l).toString();
+
+                                noOfComma++;
+
+                                if (noOfComma % 4 == 0) {
+                                    displaySeats += "\n";
+                                }
+                            }
+
+
+                        }
+                    }
+
+
+                }
+
+                //textData.append(displaySeats + "\n");
+                /*
+                textData.append("        VIP             |             " + displaySeats + "          ");
+                method = "addText";
+                mPrinter.addText(textData.toString());
+                //System.out.print("        VIP             |             " + displaySeats + "          ");
+                textData.delete(0, textData.length());
+                */
+
+
+                textData.append("        VIP             |                       \n");
+                method = "addText";
+                mPrinter.addText(textData.toString());
+                //System.out.print(textData.toString());
+                textData.delete(0, textData.length());
+
+
+                method = "addTextStyle";
+                mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.FALSE, Printer.TRUE, Printer.PARAM_DEFAULT);
+
+                method = "addTextAlign";
+                mPrinter.addTextAlign(Printer.ALIGN_RIGHT);
+
+
+                method = "addText";
+                textData.append("" + displaySeats + "");
+                mPrinter.addText(textData.toString());
+                textData.delete(0, textData.length());
+
+
+                // Restore original Style
+                method = "addTextStyle";
+                mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.FALSE, Printer.FALSE, Printer.PARAM_DEFAULT);
+
+
+                method = "addTextAlign";
+                mPrinter.addTextAlign(Printer.ALIGN_LEFT);
+
+            }
+
+
+            method = "addFeedLine";
+            mPrinter.addFeedLine(2);
+
+            if (department.toLowerCase().contains("consolidation")) {
+                consolidateDebugMsg += "P2";
+            }
+
+            // method = "addText";
+            // mPrinter.addText(textData.toString());
+            // textData.delete(0, textData.length());
+
+
+            //if ("Consolidate".compareTo(department) == 0) {
+            if (department.toLowerCase().contains("consolidation")) {
+
+                method = "addText";
+                mPrinter.addText("_______________________________________________\n\n");
+
+                method = "addSymbol";
+                mPrinter.addSymbol(token, Printer.SYMBOL_PDF417_STANDARD, Printer.LEVEL_0, barcodeWidth, barcodeHeight, 0);
+
+                /* foodRefNo */
+/*
+            method = "addText";
+            mPrinter.addText("\n\n");
+
+            method="addHLine";
+            mPrinter.addHLine(0, 100, Printer.LINE_THIN);
+*/
+
+                method = "addTextAlign";
+                mPrinter.addTextAlign(Printer.ALIGN_LEFT);
+
+
+            }
+
+            method = "addText";
+            mPrinter.addText("_______________________________________________\n");
+
+
+            method = "addTextStyle";
+            mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.TRUE, Printer.TRUE, Printer.PARAM_DEFAULT);
+            mPrinter.addTextAlign(Printer.ALIGN_LEFT);
+
+            method = "addTextAlign";
+            mPrinter.addTextAlign(Printer.ALIGN_LEFT);
+
+            method = "addFeedLine";
+            mPrinter.addFeedLine(1);
+            textData.append("Department\n");
+
+
+            method = "addTextStyle";
+            mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.TRUE, Printer.TRUE, Printer.PARAM_DEFAULT);
+            method = "addText";
+            mPrinter.addText(textData.toString());
+            textData.delete(0, textData.length());
+
+            // Restore the Text Style
+            method = "addTextStyle";
+            mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.FALSE, Printer.FALSE, Printer.PARAM_DEFAULT);
+
+
+            method = "addTextAlign";
+            mPrinter.addTextAlign(Printer.ALIGN_LEFT);
+
+            textData.append(department + "\n\n\n");
+            method = "addText";
+            mPrinter.addText(textData.toString());
+            textData.delete(0, textData.length());
+
+
+            if (department.toLowerCase().indexOf("consolidation") >= 0) {
+                if (items.size() > 0) {
+                    for (int l = 0; l < items.size(); l++) {
+
+                        method = "addTextStyle";
+                        mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.TRUE, Printer.TRUE, Printer.PARAM_DEFAULT);
+
+                        method = "addTextAlign";
+                        mPrinter.addTextAlign(Printer.ALIGN_LEFT);
+
+                        textData.append(seats.get(l).toString() + "\n");
+
+                        method = "addText";
+                        mPrinter.addText(textData.toString());
+                        //System.out.print(textData.toString());
+                        textData.delete(0, textData.length());
+
+                        method = "addTextStyle";
+                        mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.FALSE, Printer.FALSE, Printer.PARAM_DEFAULT);
+
+                        method = "addTextAlign";
+                        mPrinter.addTextAlign(Printer.ALIGN_LEFT);
+
+                        textData.append(items.get(l).toString() + "\n");
+                        method = "addText";
+                        mPrinter.addText(textData.toString());
+                        //System.out.print(textData.toString());
+                        textData.delete(0, textData.length());
+
+
+                        if ("".compareTo(remarks.get(l).toString()) != 0) {
+
+                            String tmpCheck = remarks.get(l).toString();
+
+                            if (tmpCheck.trim().compareTo("") != 0) {
+                                textData.append(remarks.get(l).toString() + "\n\n");
+
+                                method = "addText";
+                                mPrinter.addText(textData.toString());
+                                //System.out.print(textData.toString());
+                                textData.delete(0, textData.length());
+                            }
+                        }
+                    }
+                }
+            } else {
+
+                // Item
+                method = "addTextStyle";
+                mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.TRUE, Printer.TRUE, Printer.PARAM_DEFAULT);
+
+                textData.append("Item Detail\n");
+                method = "addText";
+                mPrinter.addText(textData.toString());
+                //System.out.print(textData.toString());
+                textData.delete(0, textData.length());
+
+                method = "addTextStyle";
+                mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.FALSE, Printer.FALSE, Printer.PARAM_DEFAULT);
+
+
+                if (items.size() > 0) {
+                    ArrayList items1 = new ArrayList();
+                    ArrayList remarks1 = new ArrayList();
+                    ArrayList qty1 = new ArrayList();
+
+                    for (int l = 0; l < items.size(); l++) {
+                        String tmpDepartName = departmentNames.get(l).toString();
+                        if (tmpDepartName.compareTo(department) == 0) {
+                            // Same Department, Check same item or not
+                            boolean foundItems = false;
+                            for (int y = 0; y < items1.size(); y++) {
+                                if (items1.get(y).toString().compareTo(items.get(l).toString()) == 0) {
+                                    foundItems = true;
+
+                                    // Add the quantity
+                                    int orgQty = Integer.parseInt(qty1.get(y).toString());
+                                    orgQty += Integer.parseInt(qtys.get(l).toString());
+                                    qty1.set(y, String.valueOf(orgQty));
+
+                                    String tmpRemark = "";
+                                    if ("".compareTo(remarks.get(l).toString().trim()) == 0) {
+                                        tmpRemark = remarks1.get(y).toString();
+                                    } else {
+                                        tmpRemark = remarks1.get(y).toString() + "\n" + remarks.get(l).toString();
+                                    }
+
+                                    remarks1.set(y, tmpRemark);
+                                    break;
+                                }
+                            }
+
+                            if (!foundItems) {
+
+                                items1.add(items.get(l).toString());
+                                qty1.add(qtys.get(l).toString());
+                                remarks1.add(remarks.get(l).toString().trim());
+
+                            }
+
+
+                        }
+                    }
+
+                    for (int k = 0; k < items1.size(); k++) {
+                        String value = items1.get(k) + " X " + qty1.get(k).toString();
+                        textData.append(value + "\n");
+                        method = "addText";
+                        mPrinter.addText(textData.toString());
+                        //System.out.print(textData.toString());
+                        textData.delete(0, textData.length());
+
+                        if ("".compareTo(remarks1.get(k).toString()) != 0) {
+                            textData.append(remarks1.get(k) + "\n\n");
+                            method = "addText";
+                            mPrinter.addText(textData.toString());
+                            //System.out.print(textData.toString());
+                            textData.delete(0, textData.length());
+                        }
+                    }
+                }
+            }
+
+            if (department.toLowerCase().indexOf("consolidation") >= 0) {
+                consolidateDebugMsg += "P3";
+            }
+
+            textData.append("\n\n\n");
+            method = "addText";
+            mPrinter.addText(textData.toString());
+            textData.delete(0, textData.length());
+
+
+            // Print Date
+            method = "addTextStyle";
+            mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.TRUE, Printer.TRUE, Printer.PARAM_DEFAULT);
+
+
+            textData.append("Print Date\n");
+            method = "addText";
+            mPrinter.addText(textData.toString());
+            textData.delete(0, textData.length());
+
+
+            method = "addTextStyle";
+            mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.FALSE, Printer.FALSE, Printer.PARAM_DEFAULT);
+
+
+            Date currentDt = new Date();
+            SimpleDateFormat displayFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.US);
+            String displayFileDateTime = displayFormat.format(currentDt);
+            textData.append(displayFileDateTime + "\n\n");
+            mPrinter.addText(textData.toString());
+            textData.delete(0, textData.length());
+
+
+            // F&B Order ID
+            method = "addTextStyle";
+
+            mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.TRUE, Printer.TRUE, Printer.PARAM_DEFAULT);
+            mPrinter.addTextAlign(Printer.ALIGN_RIGHT);
+
+            textData.append("F&B Order Id\n");
+            method = "addText";
+            mPrinter.addText(textData.toString());
+            textData.delete(0, textData.length());
+
+
+            method = "addTextStyle";
+            mPrinter.addTextStyle(Printer.PARAM_DEFAULT, Printer.FALSE, Printer.FALSE, Printer.PARAM_DEFAULT);
+
+
+            textData.append(token + "\n\n");
+
+
+            method = "addText";
+            mPrinter.addText(textData.toString());
+            textData.delete(0, textData.length());
+
+
+            method = "addCut";
+            mPrinter.addCut(Printer.CUT_FEED);
+
+            if (department.toLowerCase().indexOf("consolidation") >= 0) {
+                consolidateDebugMsg += "P4";
+            }
+        } catch (Exception e) {
+            // ShowMsg.showException(e, method, mContext);
+            String tmp = e.getMessage();
+            return false;
+        }
+
+        textData = null;
+
+
+        return true;
+    }
+
+
+    private boolean createReceiptData() {
+        String method = "";
+        //Bitmap logoData = BitmapFactory.decodeResource(getResources(), R.drawable.store);
+        StringBuilder textData = new StringBuilder();
+        final int barcodeWidth = 2;
+        final int barcodeHeight = 100;
+
+        if (mPrinter == null) {
+            return false;
+        }
+
+        try {
+            method = "addTextAlign";
+            mPrinter.addTextAlign(Printer.ALIGN_CENTER);
+
+            /*
+            method = "addImage";
+            mPrinter.addImage(logoData, 0, 0,
+                    logoData.getWidth(),
+                    logoData.getHeight(),
+                    Printer.COLOR_1,
+                    Printer.MODE_MONO,
+                    Printer.HALFTONE_DITHER,
+                    Printer.PARAM_DEFAULT,
+                    Printer.COMPRESS_AUTO);
+*/
+            mPrinter.addText(movieTransId);
+            mPrinter.addHLine(0, 100, 0);
+
+
+            method = "addBarcode";
+            mPrinter.addBarcode("01209457",
+
+                    Printer.BARCODE_CODE39,
+                    Printer.HRI_BELOW,
+                    Printer.FONT_A,
+                    barcodeWidth,
+                    barcodeHeight);
+
+
+            method = "addFeedLine";
+            mPrinter.addFeedLine(1);
+            textData.append("THE STORE 123 (555) 555 – 5555\n");
+            textData.append("STORE DIRECTOR – John Smith\n");
+            textData.append("\n");
+            textData.append("7/01/07 16:58 6153 05 0191 134\n");
+            textData.append("ST# 21 OP# 001 TE# 01 TR# 747\n");
+            textData.append("------------------------------\n");
+            method = "addText";
+            mPrinter.addText(textData.toString());
+            textData.delete(0, textData.length());
+
+            textData.append("400 OHEIDA 3PK SPRINGF  9.99 R\n");
+            textData.append("410 3 CUP BLK TEAPOT    9.99 R\n");
+            textData.append("445 EMERIL GRIDDLE/PAN 17.99 R\n");
+            textData.append("438 CANDYMAKER ASSORT   4.99 R\n");
+            textData.append("474 TRIPOD              8.99 R\n");
+            textData.append("433 BLK LOGO PRNTED ZO  7.99 R\n");
+            textData.append("458 AQUA MICROTERRY SC  6.99 R\n");
+            textData.append("493 30L BLK FF DRESS   16.99 R\n");
+            textData.append("407 LEVITATING DESKTOP  7.99 R\n");
+            textData.append("441 **Blue Overprint P  2.99 R\n");
+            textData.append("476 REPOSE 4PCPM CHOC   5.49 R\n");
+            textData.append("461 WESTGATE BLACK 25  59.99 R\n");
+            textData.append("------------------------------\n");
+            method = "addText";
+            mPrinter.addText(textData.toString());
+            textData.delete(0, textData.length());
+
+            textData.append("SUBTOTAL                160.38\n");
+            textData.append("TAX                      14.43\n");
+            method = "addText";
+            mPrinter.addText(textData.toString());
+            textData.delete(0, textData.length());
+
+            method = "addTextSize";
+            mPrinter.addTextSize(2, 2);
+            method = "addText";
+            mPrinter.addText("TOTAL    174.81\n");
+            method = "addTextSize";
+            mPrinter.addTextSize(1, 1);
+            method = "addFeedLine";
+            mPrinter.addFeedLine(1);
+
+            textData.append("CASH                    200.00\n");
+            textData.append("CHANGE                   25.19\n");
+            textData.append("------------------------------\n");
+            method = "addText";
+            mPrinter.addText(textData.toString());
+            textData.delete(0, textData.length());
+
+            textData.append("Purchased item total number\n");
+            textData.append("Sign Up and Save !\n");
+            textData.append("With Preferred Saving Card\n");
+            method = "addText";
+            mPrinter.addText(textData.toString());
+            textData.delete(0, textData.length());
+            method = "addFeedLine";
+            mPrinter.addFeedLine(2);
+
+            method = "addBarcode";
+            mPrinter.addBarcode("01209457",
+                    Printer.BARCODE_CODE39,
+                    Printer.HRI_BELOW,
+                    Printer.FONT_A,
+                    barcodeWidth,
+                    barcodeHeight);
+
+            method = "addCut";
+            mPrinter.addCut(Printer.CUT_FEED);
+        } catch (Exception e) {
+            // ShowMsg.showException(e, method, mContext);
+            return false;
+        }
+
+        textData = null;
+
+        return true;
+    }
+
+    private static NtlmPasswordAuthentication createAuth(String aUser, String aPasswd) {
+        StringBuffer sb = new StringBuffer(aUser);
+        sb.append(':').append(aPasswd);
+
+        return new NtlmPasswordAuthentication(sb.toString());
+    }
+
+    public static SmbFile createSmbFile(String aUser, String aPasswd, String aTarget) throws IOException {
+        NtlmPasswordAuthentication auth = createAuth(aUser, aPasswd);
+        return new SmbFile(aTarget, auth);
+    }
+
+    private static Timestamp getCurrentTimeStamp() {
+        Date today = new Date();
+        return new Timestamp(today.getTime());
+    }
+
+    private String mssqlLogUpdate(String aContent0, String aContent) {
+
+        String server = PreferencesController.getInstance().getNetwork();
+        String mssqlUserName = PreferencesController.getInstance().getNetworkUser();//sp.getString("network_user", "");  // alex
+        String mssqlPassword = PreferencesController.getInstance().getNetworkPassword();//sp.getString("network_password", ""); // csl100323
+
+
+        String debug = "";
+
+        Connection con = null;
+
+        String ret = "";
+
+
+        try {
+
+
+            Class.forName("net.sourceforge.jtds.jdbc.Driver");
+            //Class.forName("com.mysql.jdbc.Driver");
+            //Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+
+            con = DriverManager.getConnection("jdbc:jtds:sqlserver://" + server + ":1433/db_tvdisplay;", mssqlUserName, mssqlPassword);
+//;instance=SQLEXPRESS
+
+            if (con != null && !con.isClosed()) {
+                //con = DriverManager.getConnection("jdbc:sqlserver://" + server + ":1433; databaseName=db_tvdisplay; ", mssqlUserName, mssqlPassword);
+                // instance=SQLEXPRESS
+                //con = DriverManager.getConnection( "jdbc:mysql://mysql.station188.com:3306/conquerstars_association", mysqlUserName, mysqlPassword );
+
+                //Statement stmt = con.createStatement();//创建Statement
+                PreparedStatement statement = con.prepareStatement("INSERT INTO tb_tvdisplay (tvdrefno, tvdorder, tvdtype, tvddt, tvdstatus) VALUES (?,?,?,getdate(), ?)");
+                statement.setString(1, aContent0);
+                statement.setString(2, aContent);
+                statement.setString(3, "V");
+                //statement.setDate(4, new java.sql.Date(System.currentTimeMillis()));
+                //statement.setTimestamp(4, getCurrentTimeStamp());
+                statement.setString(4, "S");
+
+                statement.execute();
+                con.close();
+
+            /*Context context = getApplicationContext();
+            CharSequence text = "Connection OK"; //"Login Fail, please try again";
+            int duration = Toast.LENGTH_SHORT;
+
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+            */
+            } else {
+
+                ret = "ERROR: connection is closed";
+                //ret = "jdbc:jtds:sqlserver://" + server + ":1433/db_tvdisplay; (" + mssqlUserName + ")(" + mssqlPassword + ")";
+
+            }
+        } catch (ClassNotFoundException ce) {
+            System.out.println("Class Not Found!!");
+            ret = "Error - CNF: (" + debug + "):  Class Not Found!!";
+        } catch (SQLException se) {
+            //System.out.println(se.getMessage() );
+            ret = "Error - SE: (" + debug + "): " + se.getMessage();
+        } catch (Exception connEx) {
+
+            /*
+            Context context = getApplicationContext();
+            CharSequence text = connEx.getMessage(); //"Login Fail, please try again";
+            int duration = Toast.LENGTH_SHORT;
+
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+            */
+            ret = "Error - EX: (" + debug + "): " + connEx.getMessage();
+        }
+
+        return ret;
+    }
+
+
+    private void finalizeObject() {
+        if (mPrinter == null) {
+            return;
+        }
+
+        mPrinter.clearCommandBuffer();
+
+
+        mPrinter.setReceiveEventListener(null);
+
+        try {
+            mPrinter.disconnect();
+        } catch (Exception ex) {
+            // Do nothing
+        }
+
+        mPrinter = null;
+    }
+
+
+    private boolean isPrintable(PrinterStatusInfo status) {
+        if (status == null) {
+            return false;
+        }
+
+        if (status.getConnection() == Printer.FALSE) {
+            return false;
+        } else if (status.getOnline() == Printer.FALSE) {
+            return false;
+        } else {
+            ;//print available
+        }
+
+        return true;
+    }
+
+    private String consolidateDebugMsg = "";
+
+    private boolean runPrintDepartmentReceipt(String token, String foodRefId, String ipaddress, String department, List<String> items, List<String> qtys, List<String> remarks, List<String> departNames, List<String> seats) {
+
+        if (isLocalDebug && isLocalSkipPrint) {
+            return true;
+        }
+
+        if (isLocalDebug) {
+            ipaddress = "192.168.1.36";
+        }
+
+        // For which printer we need to use
+        int index = -1;
+        for (int ll = 0; ll < mPrinterIPList.size(); ll++) {
+            if (ipaddress.compareTo(mPrinterIPList.get(ll)) == 0) {
+                index = ll + 1;
+                break;
+            }
+        }
+
+        if (index == -1) {
+            return false;
+        }
+
+        if (department.toLowerCase().contains("consolidation")) {
+            consolidateDebugMsg += String.valueOf(index);
+        }
+
+
+        if (index - 1 > mPrinters.size() - 1 && index - 1 < 0) {
+            return false;
+        }
+        Printer printer = mPrinters.get(index - 1);
+
+        if (printer == null) {
+            return false;
+        } else {
+            mPrinter = printer;
+        }
+
+        System.out.println("runPrintReceiptSequence - 2");
+
+        if (department.toLowerCase().contains("consolidation")) {
+            consolidateDebugMsg += "[PC]";
+        }
+
+        if (!createDepartmentData(token, foodRefId, department, items, qtys, remarks, departNames, seats)) {
+            //finalizeObject();
+
+            PrinterUtils.finalizeObject(printer);
+            return false;
+        }
+
+        if (department.toLowerCase().contains("consolidation")) {
+            consolidateDebugMsg += "[PC3]";
+        }
+
+        System.out.println("runPrintReceiptSequence - 3");
+
+        if (!printData(index, ipaddress)) {
+            finalizeObject();
+
+
+            return false;
+        }
+        return true;
+    }
+
+
+    private boolean printData(int index, String ipaddress) {
+        /*
+        if (mPrinter == null) {
+            return false;
+        }
+        */
+
+        if (index - 1 > mPrinters.size() - 1 && index - 1 < 0) {
+            return false;
+        }
+        Printer printer = mPrinters.get(index - 1);
+        if (printer == null) {
+            return false;
+        }
+        if (!PrinterUtils.beginTran(printer)) {
+            System.out.println("Return - " + index);
+            return false;
+        }
+
+
+        //PrinterStatusInfo status = mPrinter.getStatus();
+        PrinterStatusInfo status = null;
+        status = printer.getStatus();
+
+        if (status == null) {
+            System.out.println("Status == null in PrintData");
+            return false;
+        }
+        //dispPrinterWarnings(status);
+
+        if (!isPrintable(status)) {
+            //ShowMsg.showMsg(makeErrorMessage(status), mContext);
+            try {
+                //mPrinter.disconnect();
+                printer.disconnect();
+
+            } catch (Exception ex) {
+                // Do nothing
+            }
+            return false;
+        }
+
+        try {
+            printer.sendData(Printer.PARAM_DEFAULT);
+
+        } catch (Epos2Exception e) {
+            //ShowMsg.showException(e, "sendData", mContext);
+            try {
+                printer.disconnect();
+            } catch (Exception ex) {
+                // Do nothing
+            }
+            return false;
+        }
+        PrinterUtils.endTran(this, printer);
+
+        return true;
+    }
+
+
 
 }

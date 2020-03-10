@@ -269,31 +269,6 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
                 // CALL API
                 getGateTransactionInfo(parts[TRANS_ID_INDEX]);
 
-                /**
-                 * Test Case
-                 */
-                /*
-                int remaining = TOTAL_TICKET - REMAIN_TICKET;
-
-                for(int i=0; i < remaining; i++) {
-                    SeatInfo seatInfo = ticket.getSeatInfoList()[i];
-                    seatInfo.setSeatStatus("Invalid");
-                }
-
-                loading.hide();
-
-                Gson gson = new Gson();
-                String json = gson.toJson(ticket);
-
-                Log.d(QRActivity.class.toString(), json);
-
-                goNext(json, Integer.toString(trans_id), refType, "");
-                 */
-
-                /**
-                 * End of Test Case
-                 */
-
             } catch (Exception e) {
                 Toast.makeText(getApplicationContext(),
                         e.getMessage(), Toast.LENGTH_SHORT).show();

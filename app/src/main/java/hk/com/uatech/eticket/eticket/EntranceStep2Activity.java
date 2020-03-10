@@ -469,52 +469,50 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
             ticketTrans = gson.fromJson(jsonSource, TicketTrans.class);
         }
 
+        Log.d(EntranceStep2Activity.class.toString(), String.valueOf(ticketTrans.getLogIn().size()));
+        Log.d(EntranceStep2Activity.class.toString(), String.valueOf(ticketTrans.getLogOut().size()));
+
         TableLayout tlEnter = (TableLayout) findViewById(R.id.tlEnterDetail);
-
-
         if(ticketTrans != null && ticketTrans.getLogIn().size() > 0) {
             for(String strDate: ticketTrans.getLogIn().keySet()) {
-
 
                 TableRow tableRow = new TableRow(this);
                 LayoutParams tableRowParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
                 tableRow.setLayoutParams(tableRowParams);
 
-
-                LayoutParams tvLayoutParam = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-
-                TextView dateTv = new TextView(this);
-                dateTv.append(strDate);
-                dateTv.setTextSize(14);
-                dateTv.setEms(10);
-                dateTv.setTextColor(Color.parseColor("#aaaaaa"));
-
-                TextView seatsTv = new TextView(this);
-                seatsTv.setInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-                seatsTv.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_END);
-                seatsTv.setTextSize(14);
-                seatsTv.setEms(10);
-                seatsTv.setTextColor(Color.parseColor("#aaaaaa"));
-                seatsTv.setPadding(0, 0, 10, 0);
+                TextView dateTv = createDateTextView(strDate);
 
                 List<String> seatNo = ticketTrans.getLogIn().get(strDate);
 
-                String seat = "";
-                for(String s : seatNo) {
-                    seat += s + " ";
-                }
-
-                seat = seat.trim();
-                seat = seat.replace(" ", ",");
-
-                seatsTv.append(seat);
+                TextView seatsTv = createSeatTextView(strDate, seatNo);
 
                 tableRow.addView(dateTv);
                 tableRow.addView(seatsTv);
-
                 tlEnter.addView(tableRow);
             }
+        } else {
+            tlEnter.setVisibility(View.GONE);
+        }
 
+
+        TableLayout tlExit = (TableLayout) findViewById(R.id.tlExitDetail);
+        if(ticketTrans != null && ticketTrans.getLogOut().size() > 0) {
+            for(String strDate : ticketTrans.getLogOut().keySet()) {
+                TableRow tr = new TableRow(this);
+                LayoutParams trLayoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+                tr.setLayoutParams(trLayoutParams);
+
+                TextView dateTv = createDateTextView(strDate);
+                List<String> seatNo = ticketTrans.getLogOut().get(strDate);
+                TextView seatsTv = createSeatTextView(strDate, seatNo);
+
+                tr.addView(dateTv);
+                tr.addView(seatsTv);
+
+                tlExit.addView(tr);
+            }
+        } else {
+            tlExit.setVisibility(View.GONE);
         }
 
 
@@ -4016,6 +4014,40 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
         } finally {
             loading.dismiss();
         }
+    }
+
+
+    private TextView createDateTextView(String strDate) {
+        TextView dateTv = new TextView(this);
+        dateTv.append(strDate);
+        dateTv.setTextSize(14);
+        dateTv.setEms(10);
+        dateTv.setTextColor(Color.parseColor("#aaaaaa"));
+
+        return dateTv;
+    }
+
+
+    private TextView createSeatTextView(String strDate, List<String> seatNo) {
+        TextView seatsTv = new TextView(this);
+        seatsTv.setInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        seatsTv.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_END);
+        seatsTv.setTextSize(14);
+        seatsTv.setEms(10);
+        seatsTv.setTextColor(Color.parseColor("#aaaaaa"));
+        seatsTv.setPadding(0, 0, 10, 0);
+
+        String seat = "";
+        for(String s : seatNo) {
+            seat += s + " ";
+        }
+
+        seat = seat.trim();
+        seat = seat.replace(" ", ",");
+
+        seatsTv.append(seat);
+
+        return seatsTv;
     }
 
 }

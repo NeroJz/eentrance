@@ -17,6 +17,8 @@ public class TicketTrans {
     private Map<String, List<String>> logIn = new HashMap<String, List<String>>();
     private Map<String, List<String>> logOut = new HashMap<String, List<String>>();
 
+    private Counter counter;
+
 
 
     public String getResultCode() {
@@ -81,5 +83,13 @@ public class TicketTrans {
 
     public void setLogOut(Map<String, List<String>> logOut) {
         this.logOut = logOut;
+    }
+
+    public Counter getCounter() {
+        return counter;
+    }
+
+    public void setCounter(Counter counter) {
+        this.counter = counter;
     }
 }

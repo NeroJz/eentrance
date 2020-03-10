@@ -10,11 +10,12 @@ public class TransInfo {
     private String cinemaName;
     private String showDate;
     private String showTime;
+    private String fullSeat;
 
 
     public TransInfo(String transId, String movieTitle, String movieCategory,
                      String houseNo, String houseName, String cinemaName,
-                     String showDate, String showTime) {
+                     String showDate, String showTime, String fullSeat) {
 
         this.transId = transId;
         this.movieTitle = movieTitle;
@@ -24,6 +25,7 @@ public class TransInfo {
         this.cinemaName = cinemaName;
         this.showDate = showDate;
         this.showTime = showTime;
+        this.fullSeat = fullSeat;
 
     }
 
@@ -89,5 +91,13 @@ public class TransInfo {
 
     public void setShowTime(String showTime) {
         this.showTime = showTime;
+    }
+
+    public String getFullSeat() {
+        return fullSeat;
+    }
+
+    public void setFullSeat(String fullSeat) {
+        this.fullSeat = fullSeat;
     }
 }

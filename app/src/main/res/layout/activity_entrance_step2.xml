@@ -465,6 +465,35 @@
                             </TableRow>
 
                             <TableRow
+                                android:id="@+id/trTotalRemaining"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:paddingTop="5dp">
+
+                                <TextView
+                                    android:id="@+id/etTotalRemaining"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:ems="10"
+                                    android:inputType="textPersonName"
+                                    android:text="Ticket (Remaining / Total)"
+                                    android:textColor="#aaaaaa"
+                                    android:textSize="14sp" />
+
+                                <TextView
+                                    android:id="@+id/tvTotalRemaining"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:ems="10"
+                                    android:inputType="textMultiLine"
+                                    android:text="2 / 3"
+                                    android:textAlignment="textEnd"
+                                    android:textColor="#a9987a"
+                                    android:textSize="14sp" />
+
+                            </TableRow>
+
+                            <TableRow
                                 android:visibility="gone"
                                 android:layout_width="fill_parent"
                                 android:layout_height="wrap_content"

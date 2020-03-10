@@ -225,8 +225,6 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
             } catch (Exception e) {
                 Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                 return;
-            } finally {
-                loading.dismiss();
             }
 
         } else { // Online mode
@@ -363,7 +361,8 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
                 ticketInfo.getHouse_ename(),
                 ticketInfo.getCinema_ename(),
                 showTime[0],
-                showTime[1]
+                showTime[1],
+                full_seats
         );
 
 
@@ -493,6 +492,10 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
 
                 transaction.setLogIn(entries);
                 transaction.setLogOut(exits);
+
+                if(transactionInfo.getCounter() != null) {
+                    transaction.setCounter(transactionInfo.getCounter());
+                }
 
                 String json = gson.toJson(transaction);
                 goNext(json, transaction.getTrans_id(), refType, "");

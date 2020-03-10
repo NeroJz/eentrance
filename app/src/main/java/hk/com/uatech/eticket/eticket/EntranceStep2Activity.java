@@ -73,6 +73,7 @@ import java.util.stream.Collectors;
 import hk.com.uatech.eticket.eticket.database.Entrance;
 import hk.com.uatech.eticket.eticket.network.NetworkRepository;
 import hk.com.uatech.eticket.eticket.network.ResponseType;
+import hk.com.uatech.eticket.eticket.pojo.Counter;
 import hk.com.uatech.eticket.eticket.pojo.SeatInfo;
 import hk.com.uatech.eticket.eticket.pojo.TicketTrans;
 import hk.com.uatech.eticket.eticket.preferences.PreferencesController;
@@ -515,6 +516,18 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
             tlExit.setVisibility(View.GONE);
         }
 
+        TableRow trTotalRemaining = (TableRow) findViewById(R.id.trTotalRemaining);
+
+        // Set Total / Remaining info
+        if(ticketTrans == null || ticketTrans.getCounter() == null) {
+            trTotalRemaining.setVisibility(View.GONE);
+        } else {
+            TextView tvTotalRemaining = (TextView) findViewById(R.id.tvTotalRemaining);
+            Counter counter = ticketTrans.getCounter();
+            String info = counter.getRemain_ticket() + " / " + counter.getTotal_ticket();
+            tvTotalRemaining.setText(info);
+        }
+
 
 
         String movieTitle = "";
@@ -528,6 +541,8 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
         String displayFilmTime = "";
         String seatIds = "";
         String resultMsg = "";
+
+        String fullSeat = "";
 
         // For Food
         List foodIds = new ArrayList();
@@ -575,7 +590,6 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
 
 
             // For Seat Info
-
             if (seats != null) {
                 for (int y = 0; y < seats.length(); y++) {
                     JSONObject seat = seats.getJSONObject(y);
@@ -753,6 +767,11 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
                     ticketState.set(ticketTypeInd, tmpState);
                 }
             }
+
+            // Get full seat info
+            fullSeat = tran.getString("fullSeat");
+
+
         } catch (Exception ec) {
             // Show Message
             Context context = getApplicationContext();
@@ -776,7 +795,8 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
         ((TextView) findViewById(R.id.cinemaName2)).setText(cinemaName2);
         ((TextView) findViewById(R.id.movieCategory)).setText(movieCategory);
 
-        ((TextView) findViewById(R.id.seatIds)).setText(seatIds);
+//        ((TextView) findViewById(R.id.seatIds)).setText(seatIds);
+        ((TextView) findViewById(R.id.seatIds)).setText(fullSeat);
 
 
         TableLayout dtlTbl = (TableLayout) findViewById(R.id.detailview);

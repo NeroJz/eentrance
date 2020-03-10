@@ -204,7 +204,7 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
             barcodeView.setStatusText(result.getText());
             getIntent().putExtra("json", lastText);
 
-            handleQrCode(lastText);
+            handleQrCode(lastText, true);
         }
 
         @Override
@@ -2493,6 +2493,33 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
 
                 break;
 
+            /**
+             * Callback to handle validation
+             * use on Boardway
+             */
+            case GATE_VALIDATE_TICKET:
+
+                if(loading != null) {
+                    loading.dismiss();
+                }
+
+                if(TextUtils.isEmpty(result) || result.startsWith("ERROR")) {
+
+
+                    Toast.makeText(
+                            getApplicationContext(),
+                            "Error! Please try another ticket",
+                            Toast.LENGTH_SHORT).show();
+
+                } else {
+                    Toast.makeText(getApplicationContext(),
+                            "Save Successful",
+                            Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+
+                break;
+
 
             default:
                 // Show some error code
@@ -3015,6 +3042,10 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
 
         } else {
 
+            /**
+             * Original Code
+             */
+            /*
             JSONObject jsonvalue = new JSONObject();
 
             // Get the String from Text Control
@@ -3085,6 +3116,51 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
                 NetworkRepository.getInstance().confirmTicket4UAT(jsonvalue.toString(), EntranceStep2Activity.this);
                 //new myAsyncTask(EntranceStep2Activity.this, TASK_COMPLETED_4_UAT).execute(urlString, jsonvalue.toString(), token);
             }
+             */
+
+            /**
+             * End of Original Code
+             */
+
+            if(checkedItems.size() > 0) {
+                List<String> seat_no = new ArrayList<String>();
+
+                JSONArray seat_arr = new JSONArray();
+                for(SeatInfo seat : checkedItems) {
+                    if("Valid".equals(seat.getSeatStatus())) {
+                        seat_arr.put(seat.getSeatId());
+                    }
+                }
+
+                if(ticketTrans != null) {
+                    try {
+                        JSONObject jsonVal = new JSONObject();
+                        jsonVal.put("trans_id", ticketTrans.getTrans_id());
+                        jsonVal.put("is_concession", ticketTrans.isConcession() ? 1 : 0);
+                        jsonVal.put("type", "in");
+
+                        if(seat_arr.length() > 0) {
+                            jsonVal.put("seat_no", seat_arr);
+                        }
+
+                        NetworkRepository.getInstance().getGateValidateTicket(jsonVal.toString(), this);
+
+                    } catch (Exception e) {
+
+                        if(loading != null) {
+                            loading.dismiss();
+                        }
+
+                        Toast.makeText(getApplicationContext(),
+                                e.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+
+                        return;
+                    }
+                }
+
+            }
+
 
             if (dialogInterface != null) {
                 dialogInterface.dismiss();

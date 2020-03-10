@@ -474,6 +474,7 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
         Log.d(EntranceStep2Activity.class.toString(), String.valueOf(ticketTrans.getLogOut().size()));
 
         TableLayout tlEnter = (TableLayout) findViewById(R.id.tlEnterDetail);
+        TextView tvClickEnter = (TextView) findViewById(R.id.tvClickEnter);
         if(ticketTrans != null && ticketTrans.getLogIn().size() > 0) {
             for(String strDate: ticketTrans.getLogIn().keySet()) {
 
@@ -493,10 +494,12 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
             }
         } else {
             tlEnter.setVisibility(View.GONE);
+            tvClickEnter.setVisibility(View.GONE);
         }
 
 
         TableLayout tlExit = (TableLayout) findViewById(R.id.tlExitDetail);
+        TextView tvClickExit = (TextView) findViewById(R.id.tvClickExit);
         if(ticketTrans != null && ticketTrans.getLogOut().size() > 0) {
             for(String strDate : ticketTrans.getLogOut().keySet()) {
                 TableRow tr = new TableRow(this);
@@ -514,6 +517,7 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
             }
         } else {
             tlExit.setVisibility(View.GONE);
+            tvClickExit.setVisibility(View.GONE);
         }
 
         TableRow trTotalRemaining = (TableRow) findViewById(R.id.trTotalRemaining);

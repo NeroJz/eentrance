@@ -231,11 +231,53 @@
                     android:background="#f4f4f4"
                     android:orientation="vertical">
 
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:paddingBottom="20dp"
+                        android:paddingEnd="20dp"
+                        android:paddingLeft="20dp"
+                        android:paddingTop="20dp">
 
+                        <Button
+                            android:id="@+id/btnEnter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="#09453C"
+                            android:textColor="#fff"
+                            android:layout_marginRight="5dp"
+                            android:text="ENTER"
+                            ></Button>
 
+                        <Button
+                            android:id="@+id/btnExit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="#FFFFFF"
+                            android:textColor="#09453C"
+                            android:layout_marginRight="5dp"
+                            android:layout_marginLeft="5dp"
+                            android:text="EXIT"></Button>
+
+                        <Button
+                            android:id="@+id/btnCancel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="#bbb"
+                            android:textColor="#fff"
+                            android:layout_marginLeft="5dp"
+                            android:onClick="cancelHandler"
+                            android:text="CANCEL"></Button>
+
+                    </LinearLayout>
 
 
                     <LinearLayout
+                        android:visibility="gone"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:orientation="horizontal"
@@ -264,6 +306,7 @@
                             android:scaleType="centerCrop"
                             android:text="Cancel"
                             app:srcCompat="@mipmap/cancel2" />
+
                     </LinearLayout>
 
 

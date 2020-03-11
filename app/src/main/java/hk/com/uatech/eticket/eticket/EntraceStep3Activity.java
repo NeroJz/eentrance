@@ -88,7 +88,7 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
 
         // Get the object
         final String jsonstr = getIntent().getExtras().getString("json");
-        JSONObject jsonObj;
+        final JSONObject jsonObj;
 
         encryptRefNo = getIntent().getExtras().getString("encryptRefNo");
         refType = getIntent().getExtras().getString("refType");
@@ -371,6 +371,26 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
             public void onClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(EntraceStep3Activity.this);
 
+
+                if(entranceList.size() == 0) {
+                    builder.setTitle("Notice");
+                    builder.setMessage("Please select the ticket to update!");
+
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+
+
+                    AlertDialog alert = builder.create();
+                    alert.show();
+                    return;
+                }
+
+
+
                 builder.setTitle("Confirm");
                 builder.setMessage("Confirm to update the transaction?");
 
@@ -465,6 +485,11 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
 
                             dialog.dismiss();
                         } else {
+
+                            /**
+                             * Original Code
+                             */
+                            /*
                             JSONObject jsonvalue = new JSONObject();
 
                             // Get the String from Text Control
@@ -520,8 +545,31 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
 
                             //JSONObject jsonObject = getJSONObjectFromURL(urlString, jsonvalue);
                             NetworkRepository.getInstance().updateTicketType(jsonvalue.toString(), EntraceStep3Activity.this);
-                            dialog.dismiss();
+                             */
+                            /**
+                             * End of original code
+                             */
 
+
+                            /**
+                             * Handling Ticket update
+                             * use for Boardway
+                             */
+                            try {
+                                for(SeatInfo seat: entranceList) {
+                                    Log.d(EntraceStep3Activity.class.toString(), seat.getSeatId() + "--"
+                                            + seat.getSeatStatus() + "--" + seat.isChecked());
+                                }
+
+
+                            } catch (Exception e) {
+                                Toast.makeText(
+                                        getApplicationContext(),
+                                        "Error! Could not update ticket",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+
+                            dialog.dismiss();
                             //  Go back to Login Page
                             //finish();
                         }
@@ -774,7 +822,6 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
 
     }
 
-
     @Override
     public void onStop() {
         super.onStop();
@@ -786,5 +833,9 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
     public void onDestroy() {
         super.onDestroy();
         this.setResult(0);
+    }
+
+    public void cancelHandler(View view) {
+        finish();
     }
 }

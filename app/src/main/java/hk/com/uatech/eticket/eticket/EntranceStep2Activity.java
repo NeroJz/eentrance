@@ -1136,6 +1136,7 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
     private void changeMode(boolean isValid) {
         if (isValid) {
             playSuccess();
+            imgValid.setVisibility(View.VISIBLE);
             imgInvalid.setVisibility(View.GONE);
 //            cardBack.setBackgroundColor(getResources().getColor(R.color.valid));
         } else {
@@ -1144,6 +1145,8 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
                 scanStatus.setVisibility(View.VISIBLE);
                 scanStatus.setText("Invalid ticket");
             }
+
+            imgInvalid.setVisibility(View.VISIBLE);
             imgValid.setVisibility(View.GONE);
 //            cardBack.setBackgroundColor(getResources().getColor(R.color.invalid));
         }

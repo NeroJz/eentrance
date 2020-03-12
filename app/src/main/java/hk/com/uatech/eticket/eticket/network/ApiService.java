@@ -1,5 +1,6 @@
 package hk.com.uatech.eticket.eticket.network;
 
+import io.reactivex.Observable;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.Header;
@@ -26,4 +27,10 @@ public interface ApiService {
     @Headers("Content-Type:application/json")
     Call<String> callUrl(
             @Url String url);
+
+    @POST
+    @Headers("Content-Type:application/json")
+    Observable<String> multipleCall(
+            @Url String url,
+            @Body String params);
 }

@@ -1,8 +1,19 @@
 package hk.com.uatech.eticket.eticket.network;
 
+import android.util.Log;
+
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import hk.com.uatech.eticket.eticket.preferences.PreferencesController;
+import io.reactivex.Observable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 import retrofit2.Call;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class NetworkRepository {
@@ -23,6 +34,7 @@ public class NetworkRepository {
     private NetworkRepository() {
         service = new Retrofit.Builder()
                 .baseUrl("https://www.google.com")
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .build()
                 .create(ApiService.class);
@@ -206,6 +218,48 @@ public class NetworkRepository {
                         parameters);
 
         stringCall.enqueue(new BaseCallback(ResponseType.GATE_VALIDATE_TICKET, callback));
+    }
+
+
+    public void multipleValidateTicket(List<JSONObject> params, final QueryCallback callback) {
+        try{
+            List<Observable<String>> requests = new ArrayList<>();
+
+            for(JSONObject jsonVal : params) {
+                Log.d(NetworkRepository.class.toString(), jsonVal.toString());
+
+                requests.add(service.multipleCall(
+                        getCommonQuery(ResponseType.GATE_VALIDATE_TICKET),
+                        jsonVal.toString()));
+            }
+
+            Observable.zip(
+                    requests,
+                    new Function<Object[], Object>() {
+                        @Override
+                        public Object apply(Object[] objects) throws Exception {
+                            return objects;
+                        }
+                    })
+                    .subscribe(
+                            new Consumer<Object>() {
+                                @Override
+                                public void accept(Object o) throws Exception {
+                                    Log.d(NetworkRepository.class.toString() + " Accept ", o.toString());
+                                    new BaseCallback(ResponseType.GATE_VALIDATE_TICKET, callback);
+                                }
+                            },
+                            new Consumer<Throwable>() {
+                                @Override
+                                public void accept(Throwable throwable) throws Exception {
+                                    Log.d(NetworkRepository.class.toString() + " Throw ", "Throw!!!");
+                                }
+                            }
+                    );
+        } catch (Exception e) {
+            Log.d(NetworkRepository.class.toString(), e.getMessage());
+        }
+
     }
 
 

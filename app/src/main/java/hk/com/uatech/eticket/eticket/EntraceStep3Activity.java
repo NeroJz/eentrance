@@ -556,9 +556,33 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
                              * use for Boardway
                              */
                             try {
+                                ArrayList<JSONObject> params = new ArrayList<>();
+
                                 for(SeatInfo seat: entranceList) {
                                     Log.d(EntraceStep3Activity.class.toString(), seat.getSeatId() + "--"
                                             + seat.getSeatStatus() + "--" + seat.isChecked());
+
+                                    Log.d(EntraceStep3Activity.class.toString(), String.valueOf("Valid".equals(seat.getSeatStatus())));
+                                    JSONObject json = new JSONObject();
+                                    json.put("trans_id", ticketTrans.getTrans_id());
+                                    json.put("is_concession", ticketTrans.isConcession() ? 1 : 0);
+
+                                    if(seat.getSeatStatus().equalsIgnoreCase("invalid")) {
+                                        json.put("type", "out");
+                                    } else if(seat.getSeatStatus().equalsIgnoreCase("valid")) {
+                                        json.put("type", "in");
+                                    }
+
+                                    json.put("seat_no", seat.getSeatId());
+
+                                    params.add(json);
+                                }
+
+
+                                if(params.size() > 0) {
+                                    NetworkRepository.getInstance().multipleValidateTicket(
+                                            params,
+                                            EntraceStep3Activity.this);
                                 }
 
 
@@ -720,6 +744,9 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
                 }
 
                 break;
+            case GATE_VALIDATE_TICKET:
+                Log.d(EntraceStep3Activity.class.toString(), "hahaha---->");
+                break;
         }
     }
 
@@ -835,7 +862,106 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
         this.setResult(0);
     }
 
+
+    private void offlineHandling() {
+        // Update to Database
+        ArrayList items = new ArrayList();
+
+        for (int x = 0; x < ticketTypeList.size(); x++) {
+            ArrayList tmpList = (ArrayList) ticketList.get(x);
+            ArrayList tmpIdList = (ArrayList) ticketIdList.get(x);
+            ArrayList tmpState = (ArrayList) ticketState.get(x);
+
+            if (tmpList != null) {
+                for (int y = 0; y < tmpList.size(); y++) {
+                    //if (((int)tmpList.get(y)) == 2) {
+                    if (((int) tmpState.get(y)) == 1) {
+
+                        Item item = new Item();
+
+                        item.setRefNo(encryptRefNo);
+                        item.setSeatId(tmpIdList.get(y).toString());
+
+                        //SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        //String currentDateandTime = sdf.format(new Date());
+
+                        //seat.put("timestamp", currentDateandTime);
+
+                        if (((int) tmpList.get(y)) == 1) {
+                            // Valid
+                            //seat.put("action", "C");
+                            item.setSeatStatus("Invalid");
+                        } else if (((int) tmpList.get(y)) == 0) {
+                            // InValid
+                            //seat.put("action", "R");
+                            item.setSeatStatus("Valid");
+                        }
+
+                        item.setTicketType(ticketTypeList.get(x).toString());
+
+                        items.add(item);
+
+                    }
+                }
+            }
+
+        }
+
+        OfflineDatabase offline = new OfflineDatabase(EntraceStep3Activity.this);
+
+        try {
+            // Hide offline saving
+            offline.accept(items);
+
+            // Add Entrance log
+            addEntranceLog();
+
+            // Check result
+            Context context = getApplicationContext();
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(context, "Save Successful", duration);
+            toast.show();
+
+            finish();
+
+            //Item rec = offline.getRecordBySeatId(encryptRefNo,  tmpIdList.get(y).toString());
+        } catch (Exception esql) {
+            // Error during execution
+            Context context = getApplicationContext();
+            String reason = esql.getMessage();
+            int duration = Toast.LENGTH_SHORT;
+
+            Toast toast = Toast.makeText(context, reason, duration);
+            toast.show();
+        }
+    }
+
+
+    /**
+     * Cancel Handling
+     * @param view
+     */
     public void cancelHandler(View view) {
         finish();
     }
+
+
+    /**
+     * Enter Handling
+     * @param view
+     */
+    public void enterHandler(View view) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(EntraceStep3Activity.this);
+
+
+    }
+
+
+    /**
+     * Exit Handling
+     * @param view
+     */
+    public void exitHandler(View view) {
+    }
+
 }

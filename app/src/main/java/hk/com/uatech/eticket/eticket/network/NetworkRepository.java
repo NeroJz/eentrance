@@ -9,6 +9,9 @@ import java.util.List;
 
 import hk.com.uatech.eticket.eticket.preferences.PreferencesController;
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import retrofit2.Call;
@@ -171,6 +174,12 @@ public class NetworkRepository {
         void onResponse(ResponseType responseType, String result);
     }
 
+    public interface ObservableCallback {
+        void onResponse(ResponseType responseType, String result);
+        void handleResults(ResponseType responseType,List<String> result);
+        void handleError(Throwable t);
+    }
+
 
     /**
      * The following contains API for Turnstile
@@ -221,9 +230,9 @@ public class NetworkRepository {
     }
 
 
-    public void multipleValidateTicket(List<JSONObject> params, final QueryCallback callback) {
+    public void multipleValidateTicket(List<JSONObject> params, final ObservableCallback callback) {
         try{
-            List<Observable<String>> requests = new ArrayList<>();
+            List<ObservableSource<String>> requests = new ArrayList<>();
 
             for(JSONObject jsonVal : params) {
                 Log.d(NetworkRepository.class.toString(), jsonVal.toString());
@@ -233,12 +242,58 @@ public class NetworkRepository {
                         jsonVal.toString()));
             }
 
+            Observable<List<String>> output = Observable.zip(
+                    requests,
+                    new Function<Object[], List<String>>() {
+                        @Override
+                        public List<String> apply(Object[] objects) throws Exception {
+                            List<String> output = new ArrayList<>();
+
+                            for(Object obj : objects){
+                                output.add(obj.toString());
+                            }
+
+                            return output;
+                        }
+                    }
+            );
+
+            output.subscribe(new Observer<List<String>>() {
+                @Override
+                public void onSubscribe(Disposable d) {
+
+                }
+
+                @Override
+                public void onNext(List<String> o) {
+                    callback.handleResults(ResponseType.GATE_VALIDATE_TICKET, o);
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    callback.handleError(e);
+                }
+
+                @Override
+                public void onComplete() {
+
+                }
+            });
+
+            /*
             Observable.zip(
                     requests,
-                    new Function<Object[], Object>() {
+                    new Function<Object[], List<String>>() {
                         @Override
-                        public Object apply(Object[] objects) throws Exception {
-                            return objects;
+                        public List<String> apply(Object[] objects) throws Exception {
+                            List<String> output = new ArrayList<>();
+
+                            for(Object obj : objects){
+                                Log.d(NetworkRepository.class.toString(), obj.toString());
+                                output.add(obj.toString());
+                            }
+
+                            return output;
                         }
                     })
                     .subscribe(
@@ -246,22 +301,23 @@ public class NetworkRepository {
                                 @Override
                                 public void accept(Object o) throws Exception {
                                     Log.d(NetworkRepository.class.toString() + " Accept ", o.toString());
-                                    new BaseCallback(ResponseType.GATE_VALIDATE_TICKET, callback);
                                 }
                             },
                             new Consumer<Throwable>() {
                                 @Override
                                 public void accept(Throwable throwable) throws Exception {
-                                    Log.d(NetworkRepository.class.toString() + " Throw ", "Throw!!!");
+                                    callback.handleError(throwable);
                                 }
                             }
                     );
+
+             */
         } catch (Exception e) {
             Log.d(NetworkRepository.class.toString(), e.getMessage());
+            throw e;
         }
 
     }
-
 
     /**
      * Import the entrance log (after Internet resumes)

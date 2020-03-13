@@ -42,7 +42,7 @@ import hk.com.uatech.eticket.eticket.pojo.TicketTrans;
 import hk.com.uatech.eticket.eticket.preferences.PreferencesController;
 import hk.com.uatech.eticket.eticket.utils.Utils;
 
-public class EntraceStep3Activity extends AppCompatActivity implements NetworkRepository.QueryCallback {
+public class EntraceStep3Activity extends AppCompatActivity implements NetworkRepository.ObservableCallback {
 
     private ProgressDialog loading = null;
 
@@ -936,7 +936,6 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
         }
     }
 
-
     /**
      * Cancel Handling
      * @param view
@@ -962,6 +961,33 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
      * @param view
      */
     public void exitHandler(View view) {
+    }
+
+
+    @Override
+    public void handleResults(ResponseType responseType, List<String> result) {
+        if(loading != null) {
+            loading.dismiss();
+        }
+
+        Toast.makeText(getApplicationContext(),
+                "Update successfully!",
+                Toast.LENGTH_SHORT).show();
+
+        finish();
+    }
+
+    @Override
+    public void handleError(Throwable t) {
+        Log.d(EntraceStep3Activity.class.toString() + "handelError", "Throw!!!");
+
+        if(loading != null) {
+            loading.dismiss();
+        }
+
+        Toast.makeText(getApplicationContext(),
+                "Error on update the ticket!",
+                Toast.LENGTH_SHORT).show();
     }
 
 }

@@ -229,7 +229,11 @@ public class NetworkRepository {
         stringCall.enqueue(new BaseCallback(ResponseType.GATE_VALIDATE_TICKET, callback));
     }
 
-
+    /**
+     * Implement multiple request using observable
+     * @param params
+     * @param callback
+     */
     public void multipleValidateTicket(List<JSONObject> params, final ObservableCallback callback) {
         try{
             List<ObservableSource<String>> requests = new ArrayList<>();
@@ -280,38 +284,6 @@ public class NetworkRepository {
                 }
             });
 
-            /*
-            Observable.zip(
-                    requests,
-                    new Function<Object[], List<String>>() {
-                        @Override
-                        public List<String> apply(Object[] objects) throws Exception {
-                            List<String> output = new ArrayList<>();
-
-                            for(Object obj : objects){
-                                Log.d(NetworkRepository.class.toString(), obj.toString());
-                                output.add(obj.toString());
-                            }
-
-                            return output;
-                        }
-                    })
-                    .subscribe(
-                            new Consumer<Object>() {
-                                @Override
-                                public void accept(Object o) throws Exception {
-                                    Log.d(NetworkRepository.class.toString() + " Accept ", o.toString());
-                                }
-                            },
-                            new Consumer<Throwable>() {
-                                @Override
-                                public void accept(Throwable throwable) throws Exception {
-                                    callback.handleError(throwable);
-                                }
-                            }
-                    );
-
-             */
         } catch (Exception e) {
             Log.d(NetworkRepository.class.toString(), e.getMessage());
             throw e;

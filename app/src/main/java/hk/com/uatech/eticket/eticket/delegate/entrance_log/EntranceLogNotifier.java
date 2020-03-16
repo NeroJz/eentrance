@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import hk.com.uatech.eticket.eticket.delegate.DelegateType;
 import hk.com.uatech.eticket.eticket.pojo.Entrance;
 import hk.com.uatech.eticket.eticket.pojo.EntranceLog;
 import hk.com.uatech.eticket.eticket.pojo.EntranceLogInput;
@@ -52,7 +53,7 @@ public class EntranceLogNotifier {
             throw e;
         } finally {
             if(this.event != null) {
-                this.event.completeHandler();
+                this.event.completeHandler(DelegateType.ENTRANCE_LOG);
             }
         }
 

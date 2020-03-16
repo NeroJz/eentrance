@@ -41,6 +41,7 @@ import hk.com.uatech.eticket.eticket.ListAdapter;
 import hk.com.uatech.eticket.eticket.OfflineDatabase;
 import hk.com.uatech.eticket.eticket.R;
 import hk.com.uatech.eticket.eticket.database.Entrance;
+import hk.com.uatech.eticket.eticket.delegate.DelegateType;
 import hk.com.uatech.eticket.eticket.delegate.entrance_log.EntranceLogEvent;
 import hk.com.uatech.eticket.eticket.delegate.entrance_log.EntranceLogNotifier;
 import hk.com.uatech.eticket.eticket.network.NetworkRepository;
@@ -1032,31 +1033,37 @@ public class SettingActivity extends AppCompatActivity implements NetworkReposit
     }
 
     @Override
-    public void completeHandler() {
-        Entrance entrance = new Entrance(SettingActivity.this);
-        entrance.removeAllRecords();
+    public void completeHandler(DelegateType delegateType) {
+        switch (delegateType) {
+            case ENTRANCE_LOG:
+                Entrance entrance = new Entrance(SettingActivity.this);
+                entrance.removeAllRecords();
 
-        OfflineDatabase db = new OfflineDatabase(SettingActivity.this);
-        refNos = db.getDistinctRefNo();
-        JSONObject jsonvalue;
+                OfflineDatabase db = new OfflineDatabase(SettingActivity.this);
+                refNos = db.getDistinctRefNo();
+                JSONObject jsonvalue;
 
-        if (refNos != null) {
-            if (refNos.size() > 0) {
-                Toast.makeText(
-                        SettingActivity.this,
-                        "Upload Successful",
-                        Toast.LENGTH_SHORT)
-                        .show();
+                if (refNos != null) {
+                    if (refNos.size() > 0) {
+                        Toast.makeText(
+                                SettingActivity.this,
+                                "Upload Successful",
+                                Toast.LENGTH_SHORT)
+                                .show();
 
-                // Finial, remove all records from db
-                db.removeAllRecords();
+                        // Finial, remove all records from db
+                        db.removeAllRecords();
 
-                // Also, need to disable the button
-                // and reset its text
-                int totalRec = db.getCount();
-                btnUpload.setEnabled(false);
-                btnUpload.setText("Upload (" + String.valueOf(totalRec) + ")");
-            }
+                        // Also, need to disable the button
+                        // and reset its text
+                        int totalRec = db.getCount();
+                        btnUpload.setEnabled(false);
+                        btnUpload.setText("Upload (" + String.valueOf(totalRec) + ")");
+                    }
+                }
+
+                break;
         }
+
     }
 }

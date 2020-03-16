@@ -13,7 +13,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -73,10 +77,47 @@ public class Entrance  extends Model{
                 String inout = cursor.getString(cursor.getColumnIndex(INOUT_DATETIME));
                 String type = cursor.getString(cursor.getColumnIndex(TYPE));
 
-                Log.d(EntraceStep3Activity.class.toString(), i + "---" +trans_id + "---" + inout + "---" + type);
+                Log.d(Entrance.class.toString(), i + "---" +trans_id + "---" + inout + "---" + type);
                 i++;
             }
         }
+    }
+
+
+    public JSONArray getEntranceList() throws JSONException {
+        JSONArray results = new JSONArray();
+
+        Cursor cursor = db.query(TABLE_NAME,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
+
+
+        if(cursor != null && cursor.getCount() > 0) {
+            while (cursor.moveToNext()) {
+                String trans_id = cursor.getString(cursor.getColumnIndex(TRANS_ID));
+                int is_concession = cursor.getString(cursor.getColumnIndex(IS_CONCESSION)).equals("1") ? 1 : 0;
+                String inout_dt = cursor.getString(cursor.getColumnIndex(INOUT_DATETIME));
+                String type = cursor.getString(cursor.getColumnIndex(TYPE));
+
+                results.put(new hk.com.uatech.eticket.eticket.pojo.Entrance(trans_id, is_concession, inout_dt, type).toJSON());
+            }
+        }
+
+
+        return results;
+    }
+
+
+    public void removeAllRecords() {
+        int result = 0;
+        String sql = "delete FROM " + TABLE_NAME;
+
+        db.execSQL(sql);
+
     }
 
 

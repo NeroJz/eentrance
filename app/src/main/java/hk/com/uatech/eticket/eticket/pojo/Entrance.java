@@ -8,12 +8,20 @@
 
 package hk.com.uatech.eticket.eticket.pojo;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class Entrance {
 
     public String trans_id;
     public int is_concession = 0;
     public String inout_datetime;
     public String type;
+
+    private final String TRANS_ID = "trans_id";
+    private final String IS_CONCESSION = "is_concession";
+    private final String INOUT_DATETIME = "inout_datetime";
+    private final String TYPE = "type";
 
     public Entrance(String trans_id, int is_concession, String inout_datetime, String type) {
         this.trans_id = trans_id;
@@ -52,5 +60,17 @@ public class Entrance {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+
+    public JSONObject toJSON() throws JSONException {
+        JSONObject obj = new JSONObject();
+
+        obj.put(TRANS_ID, trans_id);
+        obj.put(IS_CONCESSION, is_concession);
+        obj.put(INOUT_DATETIME, inout_datetime);
+        obj.put(TYPE, type);
+
+        return obj;
     }
 }

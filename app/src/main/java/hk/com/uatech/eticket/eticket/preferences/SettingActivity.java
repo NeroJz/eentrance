@@ -32,6 +32,7 @@ import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -39,13 +40,18 @@ import hk.com.uatech.eticket.eticket.Item;
 import hk.com.uatech.eticket.eticket.ListAdapter;
 import hk.com.uatech.eticket.eticket.OfflineDatabase;
 import hk.com.uatech.eticket.eticket.R;
+import hk.com.uatech.eticket.eticket.database.Entrance;
+import hk.com.uatech.eticket.eticket.delegate.entrance_log.EntranceLogEvent;
+import hk.com.uatech.eticket.eticket.delegate.entrance_log.EntranceLogNotifier;
 import hk.com.uatech.eticket.eticket.network.NetworkRepository;
 import hk.com.uatech.eticket.eticket.network.ResponseType;
+import hk.com.uatech.eticket.eticket.pojo.EntranceLog;
+import hk.com.uatech.eticket.eticket.pojo.EntranceLogInput;
 import hk.com.uatech.eticket.eticket.pojo.GateHouse;
 import hk.com.uatech.eticket.eticket.pojo.House;
 import hk.com.uatech.eticket.eticket.utils.Utils;
 
-public class SettingActivity extends AppCompatActivity implements NetworkRepository.QueryCallback {
+public class SettingActivity extends AppCompatActivity implements NetworkRepository.QueryCallback, EntranceLogEvent {
     private Button btnUpload;
     private String previousRefNo = "";
 
@@ -372,8 +378,37 @@ public class SettingActivity extends AppCompatActivity implements NetworkReposit
                             successCount = 0;
                             failCount = 0;
 
-                            // First, form the Array for the sqllite data
+                            try {
+                                Entrance entrance = new Entrance(SettingActivity.this);
+                                JSONArray jsonArr = entrance.getEntranceList();
 
+                                JSONObject jsonVal = new JSONObject();
+
+                                if(jsonArr.length() > 0) {
+                                    jsonVal.put("entrance", jsonArr);
+                                    NetworkRepository.getInstance().getGateImportEntranceLog(jsonVal.toString(), SettingActivity.this);
+                                }
+                            } catch (Exception e) {
+                                if(loading != null) {
+                                    loading.dismiss();
+                                }
+
+                                dialog.dismiss();
+                                Toast.makeText(
+                                        getApplicationContext(),
+                                        "Failed to upload file.",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+                                return;
+                            }
+
+                            dialog.dismiss();
+
+                            // First, form the Array for the sqllite data
+                            /**
+                             * Original Code
+                             */
+                            /*
                             OfflineDatabase db = new OfflineDatabase(SettingActivity.this);
                             refNos = db.getDistinctRefNo();
                             JSONObject jsonvalue;
@@ -400,6 +435,10 @@ public class SettingActivity extends AppCompatActivity implements NetworkReposit
                                     dialog.dismiss();
                                 }
                             }
+                             */
+                            /**
+                             * End of Original Code
+                             */
 
                         }
                     });
@@ -412,6 +451,7 @@ public class SettingActivity extends AppCompatActivity implements NetworkReposit
                         }
                     });
                     builder.show();
+
                 } else {
                     Toast.makeText(SettingActivity.this, "unauthorized", Toast.LENGTH_SHORT).show();
                 }
@@ -879,6 +919,61 @@ public class SettingActivity extends AppCompatActivity implements NetworkReposit
                 }
 
                 break;
+
+
+            case GATE_IMPORT_ENTRANCE_LOG:
+                if(loading != null) {
+                    loading.dismiss();
+                }
+
+                if(result.isEmpty() || result.startsWith("ERROR")) {
+                    Toast.makeText(
+                            getApplicationContext(),
+                            "Error in importing the data!",
+                            Toast.LENGTH_SHORT
+                            ).show();
+                    return;
+                }
+
+                try {
+                    EntranceLog entranceLog = gson.fromJson(result, EntranceLog.class);
+
+                    List<hk.com.uatech.eticket.eticket.pojo.Entrance> entrances = new ArrayList<hk.com.uatech.eticket.eticket.pojo.Entrance>();
+                    JSONArray jsonArray = new JSONArray();
+                    if(entranceLog.getInsert_error_list().length > 0) {
+                        for(hk.com.uatech.eticket.eticket.pojo.Entrance item : entranceLog.getInsert_error_list()) {
+                            jsonArray.put(item.toJSON());
+                        }
+                    }
+
+                    if(entranceLog.getNo_ticket_list().length > 0) {
+                        for(hk.com.uatech.eticket.eticket.pojo.Entrance item: entranceLog.getNo_ticket_list()) {
+                            jsonArray.put(item.toJSON());
+                        }
+                    }
+
+
+                    JSONObject jsonVal = new JSONObject();
+                    if(jsonArray.length() > 0) {
+                        jsonVal.put("entrances", jsonArray);
+
+                        // Save to SD card
+                        EntranceLogNotifier notifier = new EntranceLogNotifier(this);
+
+                        EntranceLogInput logInput = gson.fromJson(jsonVal.toString(), EntranceLogInput.class);
+                        notifier.save(SettingActivity.this, logInput);
+                    }
+
+                } catch (Exception e) {
+                    Toast.makeText(getApplicationContext(),
+                            e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                }
+
+
+                loading.dismiss();
+
+                break;
         }
     }
 
@@ -934,5 +1029,34 @@ public class SettingActivity extends AppCompatActivity implements NetworkReposit
         }
         return canStart ? jsonvalue : null;
 
+    }
+
+    @Override
+    public void completeHandler() {
+        Entrance entrance = new Entrance(SettingActivity.this);
+        entrance.removeAllRecords();
+
+        OfflineDatabase db = new OfflineDatabase(SettingActivity.this);
+        refNos = db.getDistinctRefNo();
+        JSONObject jsonvalue;
+
+        if (refNos != null) {
+            if (refNos.size() > 0) {
+                Toast.makeText(
+                        SettingActivity.this,
+                        "Upload Successful",
+                        Toast.LENGTH_SHORT)
+                        .show();
+
+                // Finial, remove all records from db
+                db.removeAllRecords();
+
+                // Also, need to disable the button
+                // and reset its text
+                int totalRec = db.getCount();
+                btnUpload.setEnabled(false);
+                btnUpload.setText("Upload (" + String.valueOf(totalRec) + ")");
+            }
+        }
     }
 }

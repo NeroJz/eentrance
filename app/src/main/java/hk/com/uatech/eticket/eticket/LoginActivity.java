@@ -41,11 +41,6 @@ public class LoginActivity extends AppCompatActivity implements NetworkRepositor
     private Spinner domainSpinner;
     private Map<String, String> domains = new HashMap<>();
 
-
-    // TEST ADMIN
-    private static String ADMIN_USERNAME = "admin";
-    private static String ADMIN_PASSWORD = "admin";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -104,32 +99,7 @@ public class LoginActivity extends AppCompatActivity implements NetworkRepositor
                         edtLoginId.setText("");
                         edtPassword.setText("");
 
-                    }
-
-                    /**
-                     * Dummy Test
-                     * Author: JZ
-                     * Date: 24-02-2020
-                     * Version: 0.0.1
-                     */
-                    else if(ADMIN_USERNAME.equals(edtLoginId.getEditableText().toString())
-                            && ADMIN_PASSWORD.equals(edtPassword.getEditableText().toString())) {
-                        edtLoginId.setText("");
-                        edtPassword.setText("");
-
-                        PreferencesController.getInstance().setAccessMode("online");
-                        PreferencesController.getInstance().setUserRank("MANAGER");
-                        PreferencesController.getInstance().setSettingsEnabled(true);
-
-
-                        startActivity(new Intent(LoginActivity.this, MenuActivity.class));
-                    }
-
-                    /**
-                     * End of Dummy Test
-                     */
-
-                    else {
+                    } else {
 
                         //String urlString = "http://13.228.58.92/thirdparty/api/e-entrance/staffAuth";
                         if (loading == null) {

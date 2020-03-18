@@ -861,10 +861,10 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
                 /**
                  * Test Case
                  */
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(new Date());
-                cal.add(Calendar.MINUTE, 5);
-                dt = cal.getTime();
+//                Calendar cal = Calendar.getInstance();
+//                cal.setTime(new Date());
+//                cal.add(Calendar.MINUTE, 5);
+//                dt = cal.getTime();
                 /**
                  * End of test case
                  */

@@ -229,10 +229,10 @@ public class SettingActivity extends AppCompatActivity implements NetworkReposit
          * Test
          */
 
-        String dummyIP = new String("http://52.220.110.156");
-        edtIPAddress.setText(dummyIP);
+//        String dummyIP = new String("http://52.220.110.156");
+//        edtIPAddress.setText(dummyIP);
 
-//        edtIPAddress.setText(serverIP);
+        edtIPAddress.setText(serverIP);
 
         edtEntrance.setText(PreferencesController.getInstance().getEntrance());
 

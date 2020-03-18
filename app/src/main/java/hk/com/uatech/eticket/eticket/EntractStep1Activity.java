@@ -102,10 +102,10 @@ public class EntractStep1Activity extends QRActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-//                        new IntentIntegrator(EntractStep1Activity.this).initiateScan();
+                        new IntentIntegrator(EntractStep1Activity.this).initiateScan();
 
-                        String test = "yIb9RvkLj4TTAo+1f+6vojbhqXZtl9CxaCuW7mkzzIm/h++R1nqjlc08pBFtTrN81ZzzyNetUTtebn4fMu6HDT5AV4LzwPs3QUaeea+oA/bYcvYctqG/msV8VK/Z1ut/0AJG21IozB5dBAHv3I4tp+W4v55yO0coWp0sL7RGuPZ6hYKH7YibnvH2ckS3HuJtpC1TGxNnnZo31FPETxgmyXyS6kDKidEeJMkURskETW+WjnRrcPq+uIM5sWEblYMhooq+eX1QHpNVaVgaUMlGO6Z4FGVmoTZvbSFUvwk1DVA=";
-                        handleQrCode(test, true);
+//                        String test = "yIb9RvkLj4TTAo+1f+6vojbhqXZtl9CxaCuW7mkzzIm/h++R1nqjlc08pBFtTrN81ZzzyNetUTtebn4fMu6HDT5AV4LzwPs3QUaeea+oA/bYcvYctqG/msV8VK/Z1ut/0AJG21IozB5dBAHv3I4tp+W4v55yO0coWp0sL7RGuPZ6hYKH7YibnvH2ckS3HuJtpC1TGxNnnZo31FPETxgmyXyS6kDKidEeJMkURskETW+WjnRrcPq+uIM5sWEblYMhooq+eX1QHpNVaVgaUMlGO6Z4FGVmoTZvbSFUvwk1DVA=";
+//                        handleQrCode(test, true);
                     }
                 });
 

@@ -112,7 +112,7 @@ public class EntractStep1Activity extends QRActivity {
         findViewById(R.id.btnSendQR).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                handleQrCode(((EditText) findViewById(R.id.edtQRCode)).getEditableText().toString());
+                handleQrCode(((EditText) findViewById(R.id.edtQRCode)).getEditableText().toString(), true);
             }
         });
 
@@ -134,7 +134,7 @@ public class EntractStep1Activity extends QRActivity {
                                       int before, int count) {
                 if (s.toString().contains("\n")) {
                     System.out.println(s.toString());
-                    handleQrCode(edtQrCode.getEditableText().toString());
+                    handleQrCode(edtQrCode.getEditableText().toString(), true);
 
                 }
 

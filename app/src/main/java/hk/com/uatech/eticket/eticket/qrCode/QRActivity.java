@@ -474,15 +474,19 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
 
                         seatInfoArrayList.add(seat);
 
-                        entries = addTimeEntries(
-                                gate_seat.getLog().getIn(),
-                                entries,
-                                gate_seat.getSeat_no());
 
-                        exits = addTimeEntries(
-                                gate_seat.getLog().getOut(),
-                                exits,
-                                gate_seat.getSeat_no());
+                        if(gate_seat.getLog() != null) {
+                            entries = addTimeEntries(
+                                    gate_seat.getLog().getIn(),
+                                    entries,
+                                    gate_seat.getSeat_no());
+
+                            exits = addTimeEntries(
+                                    gate_seat.getLog().getOut(),
+                                    exits,
+                                    gate_seat.getSeat_no());
+
+                        }
 
                     }
                 }
@@ -508,7 +512,7 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
     private Map<String, List<String>> addTimeEntries(List<String> logs,
                                                      Map<String, List<String>> data,
                                                      String seatNo) {
-        if(logs.size() == 0) {
+        if(logs == null || logs.size() == 0) {
             return  data;
         }
 

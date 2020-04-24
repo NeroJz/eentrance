@@ -15,6 +15,7 @@ import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import hk.com.uatech.eticket.eticket.EntraceStep3Activity;
 import hk.com.uatech.eticket.eticket.Item;
 import hk.com.uatech.eticket.eticket.pojo.SeatInfo;
 import hk.com.uatech.eticket.eticket.pojo.TicketTrans;
+import hk.com.uatech.eticket.eticket.preferences.PreferencesController;
 
 
 public class Entrance  extends Model{
@@ -103,7 +105,12 @@ public class Entrance  extends Model{
                 String inout_dt = cursor.getString(cursor.getColumnIndex(INOUT_DATETIME));
                 String type = cursor.getString(cursor.getColumnIndex(TYPE));
 
-                results.put(new hk.com.uatech.eticket.eticket.pojo.Entrance(trans_id, is_concession, inout_dt, type).toJSON());
+                String cinemaID = PreferencesController.getInstance().getCinemaId();
+
+                JSONObject entrance_json_obj = new hk.com.uatech.eticket.eticket.pojo.Entrance(trans_id, is_concession, inout_dt, type).toJSON();
+                entrance_json_obj.put("cinema_id", cinemaID);
+
+                results.put(entrance_json_obj);
             }
         }
 

@@ -3138,6 +3138,10 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
                 if(ticketTrans != null) {
                     try {
                         JSONObject jsonVal = new JSONObject();
+
+                        String savedCinemaID = PreferencesController.getInstance().getCinemaId();
+                        jsonVal.put("cinema_id", savedCinemaID);
+
                         jsonVal.put("trans_id", ticketTrans.getTrans_id());
                         jsonVal.put("is_concession", ticketTrans.isConcession() ? 1 : 0);
                         jsonVal.put("type", "in");

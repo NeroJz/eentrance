@@ -413,6 +413,8 @@ public abstract class QRActivity extends AppCompatActivity implements NetworkRep
 
         JSONObject jsonVal = new JSONObject();
         jsonVal.put("trans_id", transID);
+        jsonVal.put("cinema_id", savedCinemaID);
+
 
         NetworkRepository.getInstance().getGateGetTransactionInfo(jsonVal.toString(), this);
 

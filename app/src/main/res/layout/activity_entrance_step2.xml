@@ -71,7 +71,6 @@
                         android:layout_height="wrap_content"
                         android:adjustViewBounds="true"
                         android:paddingBottom="0dp"
-
                         android:paddingTop="0dp"
                         app:srcCompat="@mipmap/invalid" />
 
@@ -81,7 +80,6 @@
                         android:layout_height="wrap_content"
                         android:adjustViewBounds="true"
                         android:paddingBottom="0dp"
-
                         android:paddingTop="0dp"
                         app:srcCompat="@mipmap/valid" />
 
@@ -437,6 +435,7 @@
                             </TableRow>
 
                             <TableRow
+                                android:id="@+id/tblRowConcession"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:paddingTop="5dp">
@@ -447,12 +446,12 @@
                                     android:layout_height="wrap_content"
                                     android:ems="10"
                                     android:inputType="textPersonName"
-                                    android:text="Seat ID"
+                                    android:text="Concession"
                                     android:textColor="#aaaaaa"
                                     android:textSize="14sp" />
 
                                 <TextView
-                                    android:id="@+id/seatIds"
+                                    android:id="@+id/concession_seats"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:ems="10"
@@ -465,23 +464,81 @@
                             </TableRow>
 
                             <TableRow
-                                android:id="@+id/trTotalRemaining"
+                                android:id="@+id/tblRowNormal"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:paddingTop="5dp">
 
                                 <TextView
-                                    android:id="@+id/etTotalRemaining"
+                                    android:id="@+id/editText25"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:ems="10"
                                     android:inputType="textPersonName"
-                                    android:text="Ticket (Remaining / Total)"
+                                    android:text="Normal"
                                     android:textColor="#aaaaaa"
                                     android:textSize="14sp" />
 
                                 <TextView
-                                    android:id="@+id/tvTotalRemaining"
+                                    android:id="@+id/normal_seats"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:ems="10"
+                                    android:inputType="textMultiLine"
+
+                                    android:text="A1, A2, A3, A4, A5, A6, A7, A8"
+                                    android:textAlignment="textEnd"
+                                    android:textColor="#a9987a"
+                                    android:textSize="14sp" />
+                            </TableRow>
+
+                            <TableRow
+                                android:id="@+id/trTotalRemainingConcession"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:paddingTop="5dp">
+
+                                <TextView
+                                    android:id="@+id/etTotalRemainingConcession"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:ems="10"
+                                    android:inputType="textMultiLine"
+                                    android:text="Concession (Remaining / Total)"
+                                    android:textColor="#aaaaaa"
+                                    android:textSize="14sp" />
+
+                                <TextView
+                                    android:id="@+id/tvTotalRemainingConcession"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:ems="10"
+                                    android:inputType="textMultiLine"
+                                    android:text="2 / 3"
+                                    android:textAlignment="textEnd"
+                                    android:textColor="#a9987a"
+                                    android:textSize="14sp" />
+
+                            </TableRow>
+
+                            <TableRow
+                                android:id="@+id/trTotalRemainingNormal"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:paddingTop="5dp">
+
+                                <TextView
+                                    android:id="@+id/etTotalRemainingNormal"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:ems="10"
+                                    android:inputType="textMultiLine"
+                                    android:text="Normal (Remaining / Total)"
+                                    android:textColor="#aaaaaa"
+                                    android:textSize="14sp" />
+
+                                <TextView
+                                    android:id="@+id/tvTotalRemainingNormal"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:ems="10"

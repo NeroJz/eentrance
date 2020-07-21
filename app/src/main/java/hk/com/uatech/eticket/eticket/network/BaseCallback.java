@@ -17,6 +17,11 @@ public class BaseCallback implements Callback<String> {
     private boolean skip;
 
 
+    public static String getNetworkError (){
+        return NETWORK_ERROR;
+    }
+
+
     public BaseCallback(ResponseType type, NetworkRepository.QueryCallback callback) {
         this.type = type;
         this.callback = callback;

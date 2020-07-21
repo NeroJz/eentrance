@@ -85,6 +85,15 @@ import jcifs.smb.SmbFile;
 
 public class EntranceStep2Activity extends QRActivity implements NetworkRepository.QueryCallback /*, ReceiveListener */ {
 
+    enum ScanStatus {
+        NONE,
+        REDEEMED,
+        VALID,
+        INVALID,
+    }
+
+    private static boolean IS_DEBUG = false;
+
     private Printer mPrinter = null;
     private final int MY_PERMISSIONS_CAMERA = 10099;
 
@@ -193,6 +202,8 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
 
     private List<SeatInfo> checkedItems = new ArrayList<SeatInfo>();
 
+    private ScanStatus scan_status = ScanStatus.NONE;
+
 
     private BarcodeCallback callback = new BarcodeCallback() {
         @Override
@@ -217,6 +228,9 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_entrance_step2);
+
+        IS_DEBUG = Utils.isDebug(getApplicationContext());
+
         tl = (TableLayout) findViewById(R.id.detailview);
         barcodeView = (DecoratedBarcodeView) findViewById(R.id.zxing_barcode_scanner);
         Collection<BarcodeFormat> formats = Arrays.asList(BarcodeFormat.QR_CODE, BarcodeFormat.CODE_39);
@@ -470,11 +484,14 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
             ticketTrans = gson.fromJson(jsonSource, TicketTrans.class);
         }
 
-        Log.d(EntranceStep2Activity.class.toString(), String.valueOf(ticketTrans.getLogIn().size()));
-        Log.d(EntranceStep2Activity.class.toString(), String.valueOf(ticketTrans.getLogOut().size()));
+//        Log.d(EntranceStep2Activity.class.toString(), String.valueOf(ticketTrans.getLogIn().size()));
+//        Log.d(EntranceStep2Activity.class.toString(), String.valueOf(ticketTrans.getLogOut().size()));
 
         TableLayout tlEnter = (TableLayout) findViewById(R.id.tlEnterDetail);
         TextView tvClickEnter = (TextView) findViewById(R.id.tvClickEnter);
+
+        ArrayList<String> compareWith = new ArrayList<String>(Arrays.asList(ticketTrans.getSeats().split(",")));
+
         if(ticketTrans != null && ticketTrans.getLogIn().size() > 0) {
             for(String strDate: ticketTrans.getLogIn().keySet()) {
 
@@ -486,11 +503,14 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
 
                 List<String> seatNo = ticketTrans.getLogIn().get(strDate);
 
-                TextView seatsTv = createSeatTextView(strDate, seatNo);
+                TextView seatsTv = createSeatTextView(strDate, seatNo, compareWith);
 
-                tableRow.addView(dateTv);
-                tableRow.addView(seatsTv);
-                tlEnter.addView(tableRow);
+                if(!seatsTv.getText().toString().equals("")) {
+                    tableRow.addView(dateTv);
+                    tableRow.addView(seatsTv);
+                    tlEnter.addView(tableRow);
+                }
+
             }
         } else {
             tlEnter.setVisibility(View.GONE);
@@ -508,18 +528,73 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
 
                 TextView dateTv = createDateTextView(strDate);
                 List<String> seatNo = ticketTrans.getLogOut().get(strDate);
-                TextView seatsTv = createSeatTextView(strDate, seatNo);
+                TextView seatsTv = createSeatTextView(strDate, seatNo, compareWith);
 
-                tr.addView(dateTv);
-                tr.addView(seatsTv);
+                if(!seatsTv.getText().toString().equals("")) {
+                    tr.addView(dateTv);
+                    tr.addView(seatsTv);
+                    tlExit.addView(tr);
+                }
 
-                tlExit.addView(tr);
             }
         } else {
             tlExit.setVisibility(View.GONE);
             tvClickExit.setVisibility(View.GONE);
         }
 
+        boolean hasConcession = false;
+        boolean hasNormal = false;
+
+        int totalConcession = 0;
+        int totalNormal = 0;
+
+        int scanned_concession = 0;
+        int scanned_normal = 0;
+
+        for(SeatInfo seat : ticketTrans.getSeatInfoList()) {
+            if(seat.getAction() == ScanType.REFUND) continue;
+
+            if(seat.isConcession() && seat.getAction() != ScanType.REFUND) {
+                hasConcession = true;
+                totalConcession += 1;
+
+                if(seat.getAction() == ScanType.IN) {
+                    scanned_concession += 1;
+                }
+
+            } else {
+                hasNormal = true;
+                totalNormal += 1;
+
+                if(seat.getAction() == ScanType.IN) {
+                    scanned_normal += 1;
+                }
+            }
+        }
+
+        TableRow trTotalRemainingConcession = (TableRow) findViewById(R.id.trTotalRemainingConcession);
+        TableRow trTotalRemainingNormal = (TableRow) findViewById(R.id.trTotalRemainingNormal);
+
+
+        if(!hasConcession) {
+            trTotalRemainingConcession.setVisibility(View.GONE);
+        } else {
+            TextView tvTotalRemaining = (TextView) findViewById(R.id.tvTotalRemainingConcession);
+            int remain = totalConcession - scanned_concession;
+            String info = remain + " / " + totalConcession;
+            tvTotalRemaining.setText(info);
+        }
+
+        if(!hasNormal) {
+            trTotalRemainingNormal.setVisibility(View.GONE);
+        } else {
+            TextView tvTotalRemaining = (TextView) findViewById(R.id.tvTotalRemainingNormal);
+            int remain = totalNormal - scanned_normal;
+            String info = remain + " / " + totalNormal;
+            tvTotalRemaining.setText(info);
+        }
+
+        /*
         TableRow trTotalRemaining = (TableRow) findViewById(R.id.trTotalRemaining);
 
         // Set Total / Remaining info
@@ -531,6 +606,7 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
             String info = counter.getRemain_ticket() + " / " + counter.getTotal_ticket();
             tvTotalRemaining.setText(info);
         }
+         */
 
 
 
@@ -592,6 +668,8 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
                 // Nothing to do
             }
 
+            final String strType = getIntent().getExtras().getString("scanType");
+            ScanType scanType = ScanType.valueOf(strType);
 
             // For Seat Info
             if (seats != null) {
@@ -706,6 +784,78 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
                     String ticketType = seat.getString("ticketType");
                     String seatStatus = seat.getString("seatStatus");
                     int seatIcon = 0;
+
+                    Counter counter = ticketTrans.getCounter();
+
+                    // If scanned ticket type (normal/concession)
+                    // equals to seat ticket type (normal/concession)
+                    // set seat is selected
+
+                    /*
+                    if(scanType == ScanType.IN || scanType == ScanType.NONE) {
+                        if(ticketTrans.isConcession() == seat.getBoolean("isConcession") &&
+                                "Valid".compareTo(seatStatus) == 0) {
+                            seatIcon = 2;
+                            validSeats++;
+                            setSeatChecked(true, y);
+                        } else {
+                            seatIcon = 0;
+                            setSeatChecked(false, y);
+                        }
+                    } else if(scanType == ScanType.OUT) {
+                        if(ticketTrans.isConcession() == seat.getBoolean("isConcession") &&
+                                "Invalid".compareTo(seatStatus) == 0) {
+                            seatIcon = 2;
+                            validSeats++;
+                            setSeatChecked(true, y);
+                        } else {
+                            seatIcon = 0;
+                            setSeatChecked(false, y);
+                        }
+                    }
+                     */
+
+                    /*
+                    if(scanType == ScanType.IN &&
+                            ScanType.valueOf(seat.getString("action")) == ScanType.OUT &&
+                            ticketTrans.isConcession() == seat.getBoolean("isConcession")) {
+                        seatIcon = 2;
+                        validSeats++;
+                        setSeatChecked(true, y);
+                    }else if(scanType == ScanType.IN &&
+                            ScanType.valueOf(seat.getString("action")) == ScanType.NONE &&
+                            ticketTrans.isConcession() == seat.getBoolean("isConcession")) {
+                        seatIcon = 2;
+                        validSeats++;
+                        setSeatChecked(true, y);
+                    } else if(scanType == ScanType.OUT &&
+                            ScanType.valueOf(seat.getString("action")) == ScanType.IN &&
+                            ticketTrans.isConcession() == seat.getBoolean("isConcession")) {
+                        seatIcon = 2;
+                        validSeats++;
+                        setSeatChecked(true, y);
+                    } else {
+                        seatIcon = 0;
+                        setSeatChecked(false, y);
+                    }
+                     */
+
+
+                    if((scanType == ScanType.IN &&
+                            ((ScanType.valueOf(seat.getString("action")) == ScanType.OUT) ||
+                            ScanType.valueOf(seat.getString("action")) == ScanType.NONE) ||
+                            (scanType == ScanType.OUT &&
+                                    ScanType.valueOf(seat.getString("action")) == ScanType.IN)) &&
+                            ticketTrans.isConcession() == seat.getBoolean("isConcession")) {
+                        seatIcon = 2;
+                        validSeats++;
+                        setSeatChecked(true, y);
+                    } else {
+                        seatIcon = 0;
+                        setSeatChecked(false, y);
+                    }
+
+                    /**
                     if ("Valid".compareTo(seatStatus) == 0) {
                         //seatIcon = 1;
                         // Original is 1, but after chaing the requirement @20170822, all valid seat should be selected
@@ -721,6 +871,8 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
                         seatIcon = 2;
                         setSeatChecked(true, y);
                     }
+                     */
+
 
 
                     // Check whether the ticket already exist or not
@@ -750,7 +902,6 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
                         ticketList.add(newList);
                         ticketIdList.add(newIdList);
                         ticketState.add(newState);
-
                     }
 
                     // Add the list
@@ -760,10 +911,19 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
 
                     tmpList.add(seatIcon);
                     tmpIdList.add(seat.getString("seatId"));
-                    if ("Valid".compareTo(seatStatus) == 0) {
-                        tmpState.add(1);
+
+                    if(scanType == ScanType.IN || scanType == ScanType.NONE) {
+                        if ("Valid".compareTo(seatStatus) == 0) {
+                            tmpState.add(1);
+                        } else {
+                            tmpState.add(0);
+                        }
                     } else {
-                        tmpState.add(0);
+                        if ("Invalid".compareTo(seatStatus) == 0) {
+                            tmpState.add(1);
+                        } else {
+                            tmpState.add(0);
+                        }
                     }
 
                     ticketList.set(ticketTypeInd, tmpList);
@@ -773,7 +933,7 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
             }
 
             // Get full seat info
-            fullSeat = tran.getString("fullSeat");
+//            fullSeat = tran.getString("fullSeat");
 
 
         } catch (Exception ec) {
@@ -799,8 +959,35 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
         ((TextView) findViewById(R.id.cinemaName2)).setText(cinemaName2);
         ((TextView) findViewById(R.id.movieCategory)).setText(movieCategory);
 
+        // If scanned ticket is Concession
+        ArrayList<String> lst_concession = new ArrayList<String>();
+        ArrayList<String> lst_normal = new ArrayList<String>();
+        for(SeatInfo seat : ticketTrans.getSeatInfoList()) {
+            if(seat.isConcession()) {
+                lst_concession.add(seat.getSeatId());
+            }else{
+                lst_normal.add(seat.getSeatId());
+            }
+        }
+
+
+        if(lst_concession.size() > 0) {
+            String str_concession = TextUtils.join(", ", lst_concession);
+            ((TextView) findViewById(R.id.concession_seats)).setText(str_concession);
+        } else {
+            (findViewById(R.id.tblRowConcession)).setVisibility(View.GONE);
+        }
+
+        if(lst_normal.size() > 0) {
+            String str_normal = TextUtils.join(", ", lst_normal);
+            ((TextView) findViewById(R.id.normal_seats)).setText(str_normal);
+        } else {
+            (findViewById(R.id.tblRowNormal)).setVisibility(View.GONE);
+        }
+
+
 //        ((TextView) findViewById(R.id.seatIds)).setText(seatIds);
-        ((TextView) findViewById(R.id.seatIds)).setText(fullSeat);
+//        ((TextView) findViewById(R.id.seatIds)).setText(fullSeat);
 
 
         TableLayout dtlTbl = (TableLayout) findViewById(R.id.detailview);
@@ -861,10 +1048,13 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
                 /**
                  * Test Case
                  */
-//                Calendar cal = Calendar.getInstance();
-//                cal.setTime(new Date());
-//                cal.add(Calendar.MINUTE, 5);
-//                dt = cal.getTime();
+
+                if(IS_DEBUG) {
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(new Date());
+                    cal.add(Calendar.MINUTE, 5);
+                    dt = cal.getTime();
+                }
                 /**
                  * End of test case
                  */
@@ -915,10 +1105,33 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
             changeMode(isValid);
         }
 
-        if (validSeats == 0) {
-            imgValid.setVisibility(View.GONE);
-            changeMode(false);
+        final String strType = getIntent().getExtras().getString("scanType");
+        ScanType scanType = ScanType.valueOf(strType);
+
+
+        if(scanType == ScanType.OUT) {
+            if(validSeats > 0) {
+                scan_status = ScanStatus.VALID;
+                changeMode(true);
+            } else {
+                scan_status = ScanStatus.INVALID;
+                changeMode(false);
+            }
+        } else {
+            if(!outsideGracePeriod && validSeats == 0) {
+                scan_status = ScanStatus.REDEEMED;
+//                imgInvalid.setImageResource(R.mipmap.redeemed);
+                imgValid.setVisibility(View.GONE);
+                changeMode(false);
+            }else if(!outsideGracePeriod && validSeats > 0) {
+                scan_status = ScanStatus.VALID;
+                changeMode(true);
+            } else {
+                scan_status = ScanStatus.INVALID;
+                changeMode(false);
+            }
         }
+
 
         ((TextView) findViewById(R.id.showDate2)).setText(displayFilmDate);
         ((TextView) findViewById(R.id.showDate)).setText(displayFilmDate);
@@ -945,6 +1158,15 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
             }
 
         });
+
+
+
+        ImageView acceptIV = (ImageView) findViewById(R.id.accept);
+        if(scanType == ScanType.IN) {
+            acceptIV.setImageResource(R.mipmap.scan_in);
+        } else if(scanType == ScanType.OUT) {
+            acceptIV.setImageResource(R.mipmap.scan_out);
+        }
 
         findViewById(R.id.accept).setOnClickListener(new ImageView.OnClickListener() {
             @Override
@@ -1400,10 +1622,8 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
 
                                                 cprintRemark.add(obj.getString("remarks"));
 
-
                                             }
                                         }
-
 
                                     }
                                 }
@@ -2548,7 +2768,6 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
 
                 ImageView image = (ImageView) imgView;
 
-
                 String seatID = (String) tmpIdList.get(position);
 
                 if (state == 0) {
@@ -2800,8 +3019,31 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
 
     private void showAcceptDialog() {
 
+        AlertDialog.Builder builder = new AlertDialog.Builder(EntranceStep2Activity.this);
 
-        if (outsideGracePeriod) {
+        if(scan_status == ScanStatus.REDEEMED) {
+            builder.setTitle("Notice");
+            builder.setMessage("Could not proceed. All seats are redeemed.");
+
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+
+            builder.create().show();
+            return;
+        }
+
+        builder.setTitle("Confirm");
+        builder.setMessage("Confirm to admit the transaction?");
+
+        final String strType = getIntent().getExtras().getString("scanType");
+        ScanType scanType = ScanType.valueOf(strType);
+
+
+        if (outsideGracePeriod && scanType == ScanType.IN) {
             if ("Y".compareTo(Utils.getConfigValue(EntranceStep2Activity.this, "allow_invalid_save")) != 0) {
                 Context context = getApplicationContext();
                 int duration = Toast.LENGTH_LONG;
@@ -2810,13 +3052,6 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
                 return;
             }
         }
-
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(EntranceStep2Activity.this);
-
-        builder.setTitle("Confirm");
-        builder.setMessage("Confirm to admit the transaction?");
-
 
         if (loading == null) {
             loading = new ProgressDialog(this);
@@ -2846,7 +3081,11 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
     }
 
     private void accept(@Nullable DialogInterface dialogInterface) {
-        if (outsideGracePeriod) {
+
+        final String strScanType = getIntent().getExtras().getString("scanType");
+        ScanType intentScanType = ScanType.valueOf(strScanType);
+
+        if (outsideGracePeriod && intentScanType == ScanType.IN) {
             if ("Y".compareTo(Utils.getConfigValue(EntranceStep2Activity.this, "allow_invalid_save")) != 0) {
                 Context context = getApplicationContext();
                 int duration = Toast.LENGTH_LONG;
@@ -2855,6 +3094,16 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
                 return;
             }
         }
+
+
+        if(checkedItems.isEmpty()) {
+            Context context = getApplicationContext();
+            int duration = Toast.LENGTH_LONG;
+            Toast toast = Toast.makeText(context, "Please select the seat!", duration);
+            toast.show();
+            return;
+        }
+
         //debugMsg1();
 
         // Before show the loading, initialzie the printer first
@@ -2983,7 +3232,15 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
 
             ArrayList items = new ArrayList();
 
+            final String strType = getIntent().getExtras().getString("scanType");
+            ScanType scanType = ScanType.valueOf(strType);
 
+            for(SeatInfo seat : ticketTrans.getSeatInfoList()) {
+                Log.d(EntranceStep2Activity.class.toString(), seat.getTicketType() + " " + seat.getSeatId() + ticketTrans.getTrans_id());
+            }
+
+
+            /*
             for (int x = 0; x < ticketTypeList.size(); x++) {
                 ArrayList tmpList = (ArrayList) ticketList.get(x);
                 ArrayList tmpIdList = (ArrayList) ticketIdList.get(x);
@@ -2995,7 +3252,7 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
                             if (((int) tmpState.get(y)) == 1) {
                                 //valid.add(tmpIdList.get(y).toString());
                                 Item item = new Item();
-                                item.setSeatStatus("Invalid");
+                                item.setSeatStatus(scanType == ScanType.IN || scanType == ScanType.NONE ? "1" : "0"); // Invalid
                                 item.setTicketType(ticketTypeList.get(x).toString());
                                 item.setSeatId(tmpIdList.get(y).toString());
                                 item.setRefNo(encryptRefNo);
@@ -3004,7 +3261,7 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
                             } else {
                                 // Valid but not selected
                                 Item item = new Item();
-                                item.setSeatStatus("Valid");
+                                item.setSeatStatus(scanType == ScanType.IN || scanType == ScanType.NONE ? "1" : "0"); // valid
                                 item.setTicketType(ticketTypeList.get(x).toString());
                                 item.setSeatId(tmpIdList.get(y).toString());
                                 item.setRefNo(encryptRefNo);
@@ -3014,7 +3271,7 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
                         } else if (((int) tmpList.get(y)) == 0) {
                             // Original it's invalid
                             Item item = new Item();
-                            item.setSeatStatus("Invalid");
+                            item.setSeatStatus(scanType == ScanType.IN || scanType == ScanType.NONE ? "1" : "0"); // Invalid
                             item.setTicketType(ticketTypeList.get(x).toString());
                             item.setSeatId(tmpIdList.get(y).toString());
                             item.setRefNo(encryptRefNo);
@@ -3025,14 +3282,22 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
                 }
 
             }
+             */
+
+            for(SeatInfo seat : checkedItems) {
+                Item item = new Item();
+                item.setSeatStatus(scanType == ScanType.IN ? "1" : "0");
+                item.setTicketType(seat.getTicketType());
+                item.setSeatId(seat.getSeatId());
+                item.setRefNo(encryptRefNo);
+                items.add(item);
+            }
 
             // Selected, need to insert / update to DB as Invalid
             OfflineDatabase offline = new OfflineDatabase(EntranceStep2Activity.this);
             try {
                 offline.accept(items);
-
-                addEntranceLog("in");
-
+                addEntranceLog(scanType == ScanType.IN || scanType == ScanType.NONE ? "in" : "out");
                 Toast.makeText(getApplicationContext(), "Save Successful", Toast.LENGTH_SHORT).show();
                 finish();
 
@@ -3130,10 +3395,15 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
 
                 JSONArray seat_arr = new JSONArray();
                 for(SeatInfo seat : checkedItems) {
-                    if("Valid".equals(seat.getSeatStatus())) {
-                        seat_arr.put(seat.getSeatId());
-                    }
+//                    if("Valid".equals(seat.getSeatStatus())) {
+//                        seat_arr.put(seat.getSeatId());
+//                    }
+                    seat_arr.put(seat.getSeatId());
                 }
+
+
+                final String strType = getIntent().getExtras().getString("scanType");
+                ScanType scanType = ScanType.valueOf(strType);
 
                 if(ticketTrans != null) {
                     try {
@@ -3144,11 +3414,18 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
 
                         jsonVal.put("trans_id", ticketTrans.getTrans_id());
                         jsonVal.put("is_concession", ticketTrans.isConcession() ? 1 : 0);
-                        jsonVal.put("type", "in");
+
+                        if(scanType == ScanType.IN || scanType == ScanType.NONE) {
+                            jsonVal.put("type", "in");
+                        } else if(scanType == ScanType.OUT) {
+                            jsonVal.put("type", "out");
+                        }
 
                         if(seat_arr.length() > 0) {
                             jsonVal.put("seat_no", seat_arr);
                         }
+
+                        Log.d(EntranceStep2Activity.class.toString(), jsonVal.toString());
 
                         NetworkRepository.getInstance().getGateValidateTicket(jsonVal.toString(), this);
 
@@ -3185,6 +3462,11 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
     private void setSeatChecked(boolean isChecked, int position) {
         if(ticketTrans == null) return;
         SeatInfo item = ticketTrans.getSeatInfoList()[position];
+
+        Log.d(EntranceStep2Activity.class.toString(), item.getSeatId() + " "
+                + item.getTicketType() + " "
+                + item.isChecked());
+
         item.setChecked(isChecked);
 
         checkedItems.clear();
@@ -3237,6 +3519,8 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
 
         Entrance entrance = new Entrance(EntranceStep2Activity.this);
 
+        Log.d(EntranceStep2Activity.class.toString(), logType);
+
         try {
             entrance.add(encryptRefNo, checkedItems, logType);
         } catch (Exception e) {
@@ -3285,6 +3569,37 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
 
         seat = seat.trim();
         seat = seat.replace(" ", ",");
+
+        seatsTv.append(seat);
+
+        return seatsTv;
+    }
+
+
+    private TextView createSeatTextView(String strDate, List<String> seatNo, List<String> compareWith) {
+        TextView seatsTv = new TextView(this);
+        seatsTv.setInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        seatsTv.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_END);
+        seatsTv.setTextSize(14);
+        seatsTv.setEms(10);
+        seatsTv.setTextColor(Color.parseColor("#aaaaaa"));
+        seatsTv.setPadding(0, 0, 10, 0);
+
+        String seat = "";
+
+        StringBuilder sb = new StringBuilder();
+        for(String s : seatNo) {
+            if(compareWith.indexOf(s) != -1) {
+                sb.append(s);
+                sb.append(",");
+            }
+        }
+
+        seat = sb.toString();
+
+        if(!seat.equals("")){
+            seat = seat.substring(0, seat.length() - 1);
+        }
 
         seatsTv.append(seat);
 

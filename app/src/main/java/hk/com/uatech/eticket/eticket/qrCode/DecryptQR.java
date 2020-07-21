@@ -12,6 +12,8 @@
 package hk.com.uatech.eticket.eticket.qrCode;
 
 import android.util.Base64;
+import android.util.Log;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -21,9 +23,11 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import hk.com.uatech.eticket.eticket.preferences.PreferencesController;
+
 public class DecryptQR {
 
-    static final String ENCRYPTION_KEY = "abc123";
+    static final String ENCRYPTION_KEY = "123";
     static final String ALGORITHM = "AES";
     static final String TRANSFORMATION = "AES/CBC/PKCS5Padding";
 
@@ -67,7 +71,10 @@ public class DecryptQR {
 
         MessageDigest md = MessageDigest.getInstance("MD5");
 
-        byte[] hashInBytes = md.digest(ENCRYPTION_KEY.getBytes(StandardCharsets.UTF_8));
+        String prefix = PreferencesController.getInstance().getPrefixCode();
+        String encryption_key = prefix + ENCRYPTION_KEY;
+
+        byte[] hashInBytes = md.digest(encryption_key.getBytes(StandardCharsets.UTF_8));
 
         StringBuilder sb = new StringBuilder();
         for (byte b : hashInBytes) {

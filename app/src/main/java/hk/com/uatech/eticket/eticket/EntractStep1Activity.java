@@ -10,23 +10,36 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
-import hk.com.uatech.eticket.eticket.pojo.TicketInfo;
 import hk.com.uatech.eticket.eticket.preferences.PreferencesController;
 import hk.com.uatech.eticket.eticket.qrCode.QRActivity;
+import hk.com.uatech.eticket.eticket.utils.Utils;
+
 
 public class EntractStep1Activity extends QRActivity {
+
+    private static boolean IS_DEBUG = false;
+    final private static String QR_CODE_TEXT = "ih49VWLnJgY0h9sy/6L+7ClE5TtTYXKGQ99mg4laBC+50imaHzl" +
+            "OY4hsNW25pF03BthVCHHsC/Wf3+a+IMLMnviG1lGSc7EghhHPnn70JcXRxj8t1VTJ2Dd5e1vhjfsnLR" +
+            "1TNmrGdjCLUM0rrIbQ65sDve3RkjFo1/30w7BOYs3tqWzL/s0ZRAm7HG8XKZywfV6IBXW5TUX5Mb" +
+            "B6xN2Zj5ydz0CukNFwyMayMEDzyinC/pHl5B4exc+FoTIf1xM1Nqm9r5jFXg0sWJ3+nI13aTa3WelS" +
+            "VichuWFrDyyUdGOXyENcKCq8HsE2VnA7k+nd";
+
+    final private static String EMPTY_QR_CODE_MSG = "The QR Code cannot EMPTY!";
+
 //    private ProgressDialog loading = null;
     private Button btnQRCode;
     private Button btnBack;
@@ -49,11 +62,15 @@ public class EntractStep1Activity extends QRActivity {
 
     private String allowedHouse = "";
 
+    private ScanType scanType = ScanType.NONE;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_entract_step1);
         edtQrCode = (EditText) findViewById(R.id.edtQRCode);
+
+        IS_DEBUG = Utils.isDebug(getApplicationContext());
 
         LinearLayout bgLayer = (LinearLayout) findViewById(R.id.bglayer);
         if ("offline".equals(PreferencesController.getInstance().getAccessMode())) {
@@ -91,27 +108,72 @@ public class EntractStep1Activity extends QRActivity {
         showHideContent.setChecked(true);
 
         edtQrCode.setTransformationMethod(new PasswordTransformationMethod());
-        edtQrCode.setEnabled(!"offline".equals(PreferencesController.getInstance().getAccessMode()));
+        edtQrCode.setEnabled(true);
+//        edtQrCode.setEnabled(!"offline".equals(PreferencesController.getInstance().getAccessMode()));
 
-        View btnQRCode = findViewById(R.id.btnScanQR);
-
-        btnQRCode.setVisibility(
-                PreferencesController.getInstance().isShowScan() ? View.VISIBLE : View.GONE);
-
-        btnQRCode.setOnClickListener(
+        View btnQRInCode = findViewById(R.id.btnScanInQR);
+        btnQRInCode.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        new IntentIntegrator(EntractStep1Activity.this).initiateScan();
+                        scanType = ScanType.IN;
+//                        new IntentIntegrator(EntractStep1Activity.this).initiateScan();
 
-//                        String test = "yIb9RvkLj4TTAo+1f+6vojbhqXZtl9CxaCuW7mkzzIm/h++R1nqjlc08pBFtTrN81ZzzyNetUTtebn4fMu6HDT5AV4LzwPs3QUaeea+oA/bYcvYctqG/msV8VK/Z1ut/0AJG21IozB5dBAHv3I4tp+W4v55yO0coWp0sL7RGuPZ6hYKH7YibnvH2ckS3HuJtpC1TGxNnnZo31FPETxgmyXyS6kDKidEeJMkURskETW+WjnRrcPq+uIM5sWEblYMhooq+eX1QHpNVaVgaUMlGO6Z4FGVmoTZvbSFUvwk1DVA=";
-//                        handleQrCode(test, true);
+                        if(!IS_DEBUG) {
+                            String inputText = ((EditText) findViewById(R.id.edtQRCode)).getEditableText().toString();
+
+                            if("".equals(inputText)) {
+                                Toast.makeText(getApplicationContext(), EMPTY_QR_CODE_MSG, Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+
+                            handleQrCode(inputText, true);
+                            Log.d(EntractStep1Activity.class.toString(), "Stopped!");
+                        }else{
+                            handleQrCode(QR_CODE_TEXT, true);
+                        }
                     }
                 });
+
+        View btnQROutCode = findViewById(R.id.btnScanOutQR);
+        btnQROutCode.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        scanType = ScanType.OUT;
+//                        new IntentIntegrator(EntractStep1Activity.this).initiateScan();
+
+                        if(!IS_DEBUG) {
+                            String inputText = ((EditText) findViewById(R.id.edtQRCode)).getEditableText().toString();
+
+                            if("".equals(inputText)) {
+                                Toast.makeText(getApplicationContext(), EMPTY_QR_CODE_MSG, Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+
+                            handleQrCode(inputText, true);
+                            Log.d(EntractStep1Activity.class.toString(), "Stopped!");
+                        }else{
+                            handleQrCode(QR_CODE_TEXT, true);
+                        }
+                    }
+                });
+
 
         findViewById(R.id.btnSendQR).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                RadioGroup radioGroup = (RadioGroup) findViewById(R.id.rg_scan);
+                int selectedId = radioGroup.getCheckedRadioButtonId();
+
+                RadioButton rb = (RadioButton) findViewById(selectedId);
+
+                if(rb.getText().toString().equalsIgnoreCase("scan in")) {
+                    scanType = ScanType.IN;
+                }else {
+                    scanType = ScanType.OUT;
+                }
+
                 handleQrCode(((EditText) findViewById(R.id.edtQRCode)).getEditableText().toString(), true);
             }
         });
@@ -134,7 +196,7 @@ public class EntractStep1Activity extends QRActivity {
                                       int before, int count) {
                 if (s.toString().contains("\n")) {
                     System.out.println(s.toString());
-                    handleQrCode(edtQrCode.getEditableText().toString(), true);
+//                    handleQrCode(edtQrCode.getEditableText().toString(), true);
 
                 }
 
@@ -182,6 +244,7 @@ public class EntractStep1Activity extends QRActivity {
         intent.putExtra("refType", refType);
         intent.putExtra("foodRefNo", foodRefNo);
         intent.putExtra("showScanner", false);
+        intent.putExtra("scanType", scanType.toString());
         // startActivity(intent);
         startActivityForResult(intent, RETURN_FROM_ADMIT_PAGE);
     }

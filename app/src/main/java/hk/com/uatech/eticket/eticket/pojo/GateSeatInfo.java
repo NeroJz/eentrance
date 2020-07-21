@@ -8,6 +8,7 @@ public class GateSeatInfo {
     private Price price;
     private Ticket ticket;
     private Log log;
+    private String is_concession;
 
     public String getSeat_no() {
         return seat_no;
@@ -51,6 +52,18 @@ public class GateSeatInfo {
 
     public Log getLog() {
         return log;
+    }
+
+    public String getIs_concession() {
+        return is_concession;
+    }
+
+    public void setIs_concession(String is_concession) {
+        this.is_concession = is_concession;
+    }
+
+    public boolean isConcession() {
+        return is_concession.equals("1");
     }
 
     public void setLog(Log log) {

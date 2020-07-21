@@ -215,10 +215,21 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
                     String ticketType = seat.getString("ticketType");
                     String seatStatus = seat.getString("seatStatus");
                     int seatIcon = 0;
-                    if ("Valid".compareTo(seatStatus) == 0) {
-                        seatIcon = 1;
-                    } else if ("Invalid".compareTo(seatStatus) == 0) {
+//                    if ("Valid".compareTo(seatStatus) == 0) {
+//                        seatIcon = 1;
+//                    } else if ("Invalid".compareTo(seatStatus) == 0) {
+//                        seatIcon = 0;
+//                    } else {
+//                        seatIcon = 2;
+//                    }
+
+
+                    ScanType seat_action_type = ScanType.valueOf(seat.getString("action"));
+
+                    if(seat_action_type == ScanType.IN || seat_action_type == ScanType.REFUND) {
                         seatIcon = 0;
+                    } else if(seat_action_type == ScanType.OUT) {
+                        seatIcon = 1;
                     } else {
                         seatIcon = 2;
                     }
@@ -261,6 +272,7 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
 
                     tmpList.add(seatIcon);
                     tmpIdList.add(seat.getString("seatId"));
+
                     if ("Valid".compareTo(seatStatus) == 0) {
                         tmpState.add(0);
                     } else {
@@ -437,11 +449,13 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
                                             if (((int) tmpList.get(y)) == 1) {
                                                 // Valid
                                                 //seat.put("action", "C");
-                                                item.setSeatStatus("Invalid");
+//                                                item.setSeatStatus("Invalid");
+                                                item.setSeatStatus("1");
                                             } else if (((int) tmpList.get(y)) == 0) {
                                                 // InValid
                                                 //seat.put("action", "R");
-                                                item.setSeatStatus("Valid");
+//                                                item.setSeatStatus("Valid");
+                                                item.setSeatStatus("0");
                                             }
 
                                             item.setTicketType(ticketTypeList.get(x).toString());
@@ -558,6 +572,8 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
                             try {
                                 ArrayList<JSONObject> params = new ArrayList<>();
 
+                                String cinemaID = PreferencesController.getInstance().getCinemaId();
+
                                 for(SeatInfo seat: entranceList) {
                                     Log.d(EntraceStep3Activity.class.toString(), seat.getSeatId() + "--"
                                             + seat.getSeatStatus() + "--" + seat.isChecked());
@@ -565,18 +581,24 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
                                     Log.d(EntraceStep3Activity.class.toString(), String.valueOf("Valid".equals(seat.getSeatStatus())));
                                     JSONObject json = new JSONObject();
                                     json.put("trans_id", ticketTrans.getTrans_id());
-                                    json.put("is_concession", ticketTrans.isConcession() ? 1 : 0);
 
-                                    if(seat.getSeatStatus().equalsIgnoreCase("invalid")) {
-                                        json.put("type", "out");
-                                    } else if(seat.getSeatStatus().equalsIgnoreCase("valid")) {
-                                        json.put("type", "in");
-                                    }
+                                    json.put("is_concession", seat.isConcession() ? 1 : 0);
+
+//                                    if(seat.getSeatStatus().equalsIgnoreCase("invalid")) {
+//                                        json.put("type", "out");
+//                                    } else if(seat.getSeatStatus().equalsIgnoreCase("valid")) {
+//                                        json.put("type", "in");
+//                                    }
+
+                                    json.put("type", seat.getAction() == ScanType.IN ? "in" : "out");
 
                                     json.put("seat_no", seat.getSeatId());
+                                    json.put("cinema_id", cinemaID);
 
                                     params.add(json);
                                 }
+
+//                                Log.d(EntraceStep3Activity.class.toString(), params.toString());
 
 
                                 if(params.size() > 0) {
@@ -760,10 +782,24 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
                 ArrayList tmpIdList = (ArrayList) EntraceStep3Activity.this.ticketIdList.get(index);
                 ArrayList tmpState = (ArrayList) EntraceStep3Activity.this.ticketState.get(index);
 
-
                 int status = (int) tmpList.get(position);
                 int state = (int) tmpState.get(position);
-                String seatID = (String)tmpIdList.get(position);
+                final String seatID = (String)tmpIdList.get(position);
+
+                List<SeatInfo> seats = Arrays.asList(ticketTrans.getSeatInfoList());
+
+
+                Predicate<SeatInfo> matchSeatID = new Predicate<SeatInfo>() {
+                    @Override
+                    public boolean apply(SeatInfo seatInfo) {
+                        return seatInfo.getSeatId().equals(seatID) && seatInfo.getAction() != ScanType.REFUND;
+                    }
+                };
+
+                Collection<SeatInfo> result = Utils.filter(seats, matchSeatID);
+
+                if(result.size() == 0) return;
+
 
                 ImageView image = (ImageView) imgView;
                 if (status == 0) {
@@ -820,6 +856,7 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
 
         for(SeatInfo seat : result) {
             seat.setChecked(!seat.isChecked());
+            seat.setAction(seat.getAction() == ScanType.IN ? ScanType.OUT : ScanType.IN);
         }
 
         entranceList.clear();
@@ -827,6 +864,11 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
             if(seat.isChecked()) {
                 entranceList.add(seat);
             }
+        }
+
+        for(SeatInfo seat : entranceList) {
+            Log.d(EntraceStep3Activity.class.toString(), "SeatInfo: " +
+                    seat.getSeatId() + " " + seat.getAction() + " " + seat.getSeatStatus());
         }
     }
 

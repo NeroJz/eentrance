@@ -1,5 +1,7 @@
 package hk.com.uatech.eticket.eticket.pojo;
 
+import hk.com.uatech.eticket.eticket.ScanType;
+
 public class SeatInfo {
     private String seatStatus = "Valid";
     private String seatId;
@@ -7,6 +9,7 @@ public class SeatInfo {
 
     private boolean isChecked = false;
     private boolean isConcession = false;
+    private ScanType action = ScanType.OUT;
 
 
     public SeatInfo(String seatId, String ticketType) {
@@ -53,5 +56,13 @@ public class SeatInfo {
 
     public void setConcession(boolean concession) {
         isConcession = concession;
+    }
+
+    public ScanType getAction() {
+        return action;
+    }
+
+    public void setAction(ScanType action) {
+        this.action = action;
     }
 }

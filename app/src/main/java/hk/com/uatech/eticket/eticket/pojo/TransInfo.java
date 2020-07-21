@@ -29,6 +29,20 @@ public class TransInfo {
 
     }
 
+    public TransInfo(String transId, String movieTitle, String movieCategory,
+                     String houseNo, String houseName, String cinemaName,
+                     String showDate, String showTime) {
+
+        this.transId = transId;
+        this.movieTitle = movieTitle;
+        this.movieCategory = movieCategory;
+        this.houseNo = houseNo;
+        this.houseName = houseName;
+        this.cinemaName = cinemaName;
+        this.showDate = showDate;
+        this.showTime = showTime;
+    }
+
     public String getTransId() {
         return transId;
     }

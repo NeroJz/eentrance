@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import hk.com.uatech.eticket.eticket.ScanType;
+
 public class TicketTrans {
 
     private String resultCode;
@@ -19,6 +21,10 @@ public class TicketTrans {
 
     private Counter counter;
 
+    private String seats = "";
+    private String filtered_seats = "";
+
+    private ScanType scanType = ScanType.NONE;
 
 
     public String getResultCode() {
@@ -91,5 +97,29 @@ public class TicketTrans {
 
     public void setCounter(Counter counter) {
         this.counter = counter;
+    }
+
+    public String getSeats() {
+        return seats;
+    }
+
+    public void setSeats(String seats) {
+        this.seats = seats;
+    }
+
+    public String getFiltered_seats() {
+        return filtered_seats;
+    }
+
+    public void setFiltered_seats(String filtered_seats) {
+        this.filtered_seats = filtered_seats;
+    }
+
+    public ScanType getScanType() {
+        return scanType;
+    }
+
+    public void setScanType(ScanType scanType) {
+        this.scanType = scanType;
     }
 }

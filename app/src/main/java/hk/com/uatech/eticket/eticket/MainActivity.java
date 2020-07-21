@@ -43,6 +43,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Thread.setDefaultUncaughtExceptionHandler(new ETicketExceptionHandler(this));
+
+        if(getIntent().getBooleanExtra("crash", false)) {
+            Toast.makeText(this, "App restarted after crashed", Toast.LENGTH_LONG).show();
+        }
+
         // Request External Storage Permission
         if(ContextCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)

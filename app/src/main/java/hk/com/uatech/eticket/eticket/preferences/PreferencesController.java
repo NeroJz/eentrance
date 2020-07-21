@@ -66,6 +66,7 @@ public class PreferencesController {
 
 
     private static final String CINEMA_ID = "cinema_id";
+    private static final String PREFIX_CODE = "prefix_code";
 
 
 
@@ -419,6 +420,17 @@ public class PreferencesController {
 
     public void setCinemaId(String value) {
         sharedPreferences.edit().putString(CINEMA_ID, value).apply();
+    }
+
+
+    /**
+     * Set / Get Prefix Code
+     * @return string
+     */
+    public String getPrefixCode() { return sharedPreferences.getString(PREFIX_CODE, ""); }
+
+    public void setPrefixCode(String value) {
+        sharedPreferences.edit().putString(PREFIX_CODE, value).apply();
     }
 
 }

@@ -109,6 +109,7 @@ public class SettingActivity extends AppCompatActivity implements NetworkReposit
     private EditText edtUsePrinter;
 
     private EditText edtCinemaID;
+    private EditText edtPrefixCode;
 
 
     private Gson gson = new Gson();
@@ -218,6 +219,16 @@ public class SettingActivity extends AppCompatActivity implements NetworkReposit
             cinemaID = Utils.getConfigValue(getApplicationContext(), "cinema_id");
         }
         edtCinemaID.setText(cinemaID);
+
+
+        // Set Prefix Code if existed
+        edtPrefixCode = (EditText) findViewById(R.id.edtPrefixCode);
+
+        String prefixCode = PreferencesController.getInstance().getPrefixCode();
+        if("".equals(prefixCode)) {
+            prefixCode = Utils.getConfigValue(getApplicationContext(), "prefix_code");
+        }
+        edtPrefixCode.setText(prefixCode);
 
 
         btnUpload = (Button) findViewById(R.id.btnUpload);
@@ -379,6 +390,7 @@ public class SettingActivity extends AppCompatActivity implements NetworkReposit
                             successCount = 0;
                             failCount = 0;
 
+                            /* Comment out temporary */
                             try {
                                 Entrance entrance = new Entrance(SettingActivity.this);
                                 JSONArray jsonArr = entrance.getEntranceList();
@@ -582,6 +594,9 @@ public class SettingActivity extends AppCompatActivity implements NetworkReposit
                 // Save cinema id
                 PreferencesController.getInstance().setCinemaId(cinemaID);
 
+                // Save Prefix Code
+                String prefixCode = edtPrefixCode.getEditableText().toString();
+                PreferencesController.getInstance().setPrefixCode(prefixCode);
 
                 if ("Y".compareTo(setupMode) != 0 &&
                         "offline".compareTo(accessMode) != 0) {
@@ -937,6 +952,7 @@ public class SettingActivity extends AppCompatActivity implements NetworkReposit
                 }
 
                 try {
+
                     EntranceLog entranceLog = gson.fromJson(result, EntranceLog.class);
 
                     List<hk.com.uatech.eticket.eticket.pojo.Entrance> entrances = new ArrayList<hk.com.uatech.eticket.eticket.pojo.Entrance>();
@@ -953,9 +969,12 @@ public class SettingActivity extends AppCompatActivity implements NetworkReposit
                         }
                     }
 
-
                     JSONObject jsonVal = new JSONObject();
-                    if(jsonArray.length() > 0) {
+
+
+                    if(jsonArray.length() == 0) {
+                        this.completeHandler(DelegateType.ENTRANCE_LOG);
+                    } else {
                         jsonVal.put("entrances", jsonArray);
 
                         // Save to SD card
@@ -1034,6 +1053,7 @@ public class SettingActivity extends AppCompatActivity implements NetworkReposit
 
     @Override
     public void completeHandler(DelegateType delegateType) {
+
         switch (delegateType) {
             case ENTRANCE_LOG:
                 Entrance entrance = new Entrance(SettingActivity.this);

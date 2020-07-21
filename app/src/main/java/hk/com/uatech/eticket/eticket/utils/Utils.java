@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
+import hk.com.uatech.eticket.eticket.EntractStep1Activity;
 import hk.com.uatech.eticket.eticket.R;
 
 public class Utils {
@@ -158,6 +159,15 @@ public class Utils {
         }
 
         return null;
+    }
+
+
+    public static boolean isDebug(Context context) {
+        try {
+            return getConfigValue(context, "is_debug").equals("1") ? true : false;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     /**

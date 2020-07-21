@@ -95,16 +95,60 @@
 
 
         <Button
-            android:id="@+id/btnScanQR"
+            android:id="@+id/btnScanInQR"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Scan QR Code" />
+            android:text="Scan In" />
 
         <Button
-            android:id="@+id/btnSendQR"
+            android:id="@+id/btnScanOutQR"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Send QR Code" />
+            android:text="Scan Out" />
+
+
+        <LinearLayout
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="20dp"
+            android:layout_gravity="center"
+            >
+
+            <Button
+                android:id="@+id/btnSendQR"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Send QR Code" />
+
+            <RadioGroup
+                android:id="@+id/rg_scan"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checkedButton="@+id/first"
+                android:orientation="horizontal">
+                <RadioButton
+                    android:id="@+id/rb_scan_in"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="SCAN IN"
+                    android:checked="true"/>
+                <RadioButton
+                    android:id="@+id/rb_scan_out"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="SCAN OUT"/>
+            </RadioGroup>
+
+
+        </LinearLayout>
+
+
+
+
 
         <Button
             android:id="@+id/btnBack"

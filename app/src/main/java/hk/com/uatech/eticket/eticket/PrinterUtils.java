@@ -1,7 +1,7 @@
 package hk.com.uatech.eticket.eticket;
 
 import android.app.Activity;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.epson.epos2.Epos2Exception;
 import com.epson.epos2.printer.Printer;

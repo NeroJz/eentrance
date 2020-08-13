@@ -11,15 +11,13 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.StrictMode;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AlertDialog;
 import android.text.InputType;
-import android.text.Layout;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,7 +26,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -38,7 +35,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.internal.util.Predicate;
+//import com.android.internal.util.Predicate;
 import com.epson.epos2.Epos2Exception;
 import com.epson.epos2.printer.Printer;
 import com.epson.epos2.printer.PrinterStatusInfo;
@@ -68,7 +65,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.function.Predicate;
 
 import hk.com.uatech.eticket.eticket.database.Entrance;
 import hk.com.uatech.eticket.eticket.network.NetworkRepository;
@@ -1050,10 +1047,10 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
                  */
 
                 if(IS_DEBUG) {
-                    Calendar cal = Calendar.getInstance();
-                    cal.setTime(new Date());
-                    cal.add(Calendar.MINUTE, 5);
-                    dt = cal.getTime();
+//                    Calendar cal = Calendar.getInstance();
+//                    cal.setTime(new Date());
+//                    cal.add(Calendar.MINUTE, 5);
+//                    dt = cal.getTime();
                 }
                 /**
                  * End of test case
@@ -3425,7 +3422,7 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
                             jsonVal.put("seat_no", seat_arr);
                         }
 
-                        Log.d(EntranceStep2Activity.class.toString(), jsonVal.toString());
+                        Log.d(EntranceStep2Activity.class.toString(), "123" + jsonVal.toString());
 
                         NetworkRepository.getInstance().getGateValidateTicket(jsonVal.toString(), this);
 
@@ -3489,9 +3486,14 @@ public class EntranceStep2Activity extends QRActivity implements NetworkReposito
 
         Predicate<SeatInfo> matchSeatID = new Predicate<SeatInfo>() {
             @Override
-            public boolean apply(SeatInfo seatInfo) {
+            public boolean test(SeatInfo seatInfo) {
                 return seatInfo.getSeatId().equals(seatID);
             }
+
+//            @Override
+//            public boolean apply(SeatInfo seatInfo) {
+//                return seatInfo.getSeatId().equals(seatID);
+//            }
         };
 
         Collection<SeatInfo> result = Utils.filter(seats, matchSeatID);

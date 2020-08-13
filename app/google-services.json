@@ -1,0 +1,83 @@
+{
+  "project_info": {
+    "project_number": "1014603476118",
+    "firebase_url": "https://broadway-staging.firebaseio.com",
+    "project_id": "broadway-staging",
+    "storage_bucket": "broadway-staging.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1014603476118:android:23298651c0c48429",
+        "android_client_info": {
+          "package_name": "gd.com.client.broadway"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1014603476118-5jc0g4cn0sttmcf3d6rdhrs1av1m45ce.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAM2fzW1bbQuEqiIiae8Ln-4mxmO5_O9V0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1014603476118-5jc0g4cn0sttmcf3d6rdhrs1av1m45ce.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1014603476118-0jb906i4i4j347ikv4uo4clgjf1q0vgs.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.gdeasia.broadway"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1014603476118:android:3f9d7e8ec61a80c088a6b7",
+        "android_client_info": {
+          "package_name": "hk.com.uatech.eticket.eticket"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1014603476118-5jc0g4cn0sttmcf3d6rdhrs1av1m45ce.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAM2fzW1bbQuEqiIiae8Ln-4mxmO5_O9V0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1014603476118-5jc0g4cn0sttmcf3d6rdhrs1av1m45ce.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1014603476118-0jb906i4i4j347ikv4uo4clgjf1q0vgs.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.gdeasia.broadway"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

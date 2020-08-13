@@ -2,43 +2,35 @@ package hk.com.uatech.eticket.eticket.qrCode;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Vibrator;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.mysql.jdbc.StringUtils;
 
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import hk.com.uatech.eticket.eticket.Item;
 import hk.com.uatech.eticket.eticket.OfflineDatabase;
 import hk.com.uatech.eticket.eticket.R;
 import hk.com.uatech.eticket.eticket.ScanType;
-import hk.com.uatech.eticket.eticket.database.Show;
 import hk.com.uatech.eticket.eticket.network.BaseCallback;
 import hk.com.uatech.eticket.eticket.network.NetworkRepository;
 
 
-import hk.com.uatech.eticket.eticket.network.NetworkRepository;
 import hk.com.uatech.eticket.eticket.network.ResponseType;
 import hk.com.uatech.eticket.eticket.pojo.GateSeatInfo;
 import hk.com.uatech.eticket.eticket.pojo.GateTransactionInfo;

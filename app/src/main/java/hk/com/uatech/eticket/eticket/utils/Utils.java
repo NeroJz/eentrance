@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.util.Log;
 
-import com.android.internal.util.Predicate;
+//import com.android.internal.util.Predicate;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.function.Predicate;
 
 import hk.com.uatech.eticket.eticket.EntractStep1Activity;
 import hk.com.uatech.eticket.eticket.R;
@@ -180,7 +181,7 @@ public class Utils {
     public static <T> Collection<T> filter(Collection<T> col, Predicate<T> predicate) {
         Collection<T> result = new ArrayList<T>();
         for(T element: col) {
-            if(predicate.apply(element)) {
+            if(predicate.test(element)) {
                 result.add(element);
             }
         }

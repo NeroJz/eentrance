@@ -5,22 +5,20 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.internal.util.Predicate;
+//import com.android.internal.util.Predicate;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
@@ -33,6 +31,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Predicate;
 
 import hk.com.uatech.eticket.eticket.database.Entrance;
 import hk.com.uatech.eticket.eticket.network.NetworkRepository;
@@ -791,9 +790,14 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
 
                 Predicate<SeatInfo> matchSeatID = new Predicate<SeatInfo>() {
                     @Override
-                    public boolean apply(SeatInfo seatInfo) {
+                    public boolean test(SeatInfo seatInfo) {
                         return seatInfo.getSeatId().equals(seatID) && seatInfo.getAction() != ScanType.REFUND;
                     }
+
+//                    @Override
+//                    public boolean apply(SeatInfo seatInfo) {
+//                        return seatInfo.getSeatId().equals(seatID) && seatInfo.getAction() != ScanType.REFUND;
+//                    }
                 };
 
                 Collection<SeatInfo> result = Utils.filter(seats, matchSeatID);
@@ -845,9 +849,14 @@ public class EntraceStep3Activity extends AppCompatActivity implements NetworkRe
 
         Predicate<SeatInfo> matchSeatID = new Predicate<SeatInfo>() {
             @Override
-            public boolean apply(SeatInfo seatInfo) {
+            public boolean test(SeatInfo seatInfo) {
                 return seatInfo.getSeatId().equals(seatID);
             }
+
+//            @Override
+//            public boolean apply(SeatInfo seatInfo) {
+//                return seatInfo.getSeatId().equals(seatID);
+//            }
         };
 
         Collection<SeatInfo> result = Utils.filter(seats, matchSeatID);

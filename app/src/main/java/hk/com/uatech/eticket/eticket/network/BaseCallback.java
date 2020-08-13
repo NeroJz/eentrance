@@ -1,6 +1,6 @@
 package hk.com.uatech.eticket.eticket.network;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.io.IOException;
 
